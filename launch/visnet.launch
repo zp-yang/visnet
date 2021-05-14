@@ -1,0 +1,13 @@
+<launch>
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="worlds/visnet.world"/>
+    <arg name="verbose" value="true"/>
+    <arg name="paused" value="false"/>
+    <arg name="debug" value="false"/>
+  </include>
+  <node pkg="visnet" name="set_model_state" type="set_model_state.py" output="screen"/> 
+  <node type="rviz" name="rviz" pkg="rviz" args="-d $(find visnet)/config/visnet.rviz" />
+  <node name="record" pkg="rosbag" type="record" args="record"/>
+</launch>
+<!-- vim: set et fenc=utf-8 ff=unix ft=xml sts=0 sw=2 ts=2 : -->
+

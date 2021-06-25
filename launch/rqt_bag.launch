@@ -1,0 +1,12 @@
+<launch>
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+      <arg name="world_name" value="worlds/visnet.world"/>
+      <arg name="verbose" value="true"/>
+      <arg name="paused" value="true"/>
+      <arg name="debug" value="false"/>
+    </include>
+    <node pkg="visnet" name="set_model_state" type="set_model_state.py" output="screen"/> 
+    <node name="image_view" pkg="rqt_image_view" type="rqt_image_view" args="/camera_1/image_raw"/>
+    <node name="rqt_bag" pkg="rqt_bag" type="rqt_bag" args="$(find visnet)/data/visnet.bag"/>
+</launch>
+  <!-- vim: set et fenc=utf-8 ff=unix ft=xml sts=0 sw=2 ts=2 : -->

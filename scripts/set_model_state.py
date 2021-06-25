@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+from io import open_code
 import numpy as np
 import rospy 
 import rospkg 
@@ -27,16 +28,16 @@ def main():
     rospy.wait_for_service('/gazebo/set_model_state')
     start = rospy.get_rostime()
     elapsed = 0
-
+    end_time = 10
     rate = rospy.Rate(100)
-
-    while not rospy.is_shutdown():
+    # while not rospy.is_shutdown():
+    while elapsed <= end_time:
         now = rospy.get_rostime()
         elapsed = (now - start).to_sec()
         rospy.wait_for_service('/gazebo/set_model_state')
         try:
-            state_msg.pose.position.x = 10*np.sin(2*np.pi*elapsed*0.1)
-            state_msg.pose.position.y = 5*np.cos(2*np.pi*elapsed*0.1)
+            state_msg.pose.position.x = 30*np.sin(2*np.pi*elapsed*0.1)
+            state_msg.pose.position.y = 15*np.cos(2*np.pi*elapsed*0.1)
             set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
             resp = set_state( state_msg )
 
@@ -56,6 +57,7 @@ def main():
         except rospy.ServiceException as e:
             print("Service call failed: {:s}".format(str(e)))
         rate.sleep()
+    rospy.spin()
 
 if __name__ == '__main__':
     try:

@@ -28,249 +28,237 @@
 
     <include>
       <uri>model://house_1</uri>
-      <pose>-18.3354 17.3604 0 0 -0 0</pose>
+      <pose>-20.0 20.0 0 0 -0 0</pose>
     </include>
 
     <include>
       <uri>model://house_2</uri>
-      <pose>-27.1274 -28.8655 0 0 -0 0</pose>
+      <pose>-20.0 -20.0 0 0 -0 0</pose>
     </include>
 
     <include>
       <uri>model://house_3</uri>
-      <pose>29.0538 24.6796 0 0 -0 0</pose>
+      <pose>20.0 20.0 0 0 -0 0</pose>
     </include>
 
     <include>
       <uri>model://school</uri>
-      <pose>28.7054 -24.0729 0 0 -0 0</pose>
+      <pose>20.0 -20.0 0 0 -0 0</pose>
     </include>
 
     <model name="camera_1">
       <static>true</static>
-      <pose>21.273 22.1639 10 0 -1.57 0</pose>
+      <pose>20 20 12 0 0 -2.2</pose>
       <link name="link">
         <visual name="visual">
           <geometry>
             <box>
-              <size>0.1 0.1 0.1</size>
+              <size>0.3 0.1 0.1</size>
             </box>
           </geometry>
         </visual>
-        <sensor name="camera" type="wideanglecamera">
+        <sensor name="camera" type="camera">
           <camera>
-            <horizontal_fov>3.14</horizontal_fov>
+            <horizontal_fov>2</horizontal_fov>
             <image>
-              <width>1920</width>
-              <height>1920</height>
+              <width>2000</width>
+              <height>2000</height>
             </image>
             <clip>
               <near>0.1</near>
               <far>100</far>
             </clip>
-            <lens>
-              <type>custom</type> 
-              <custom_function> <!-- manually defined mapping function r = c1*f*fun(theta/c2 + c3) More information here: https://en.wikipedia.org/wiki/Fisheye_lens#Mapping_function -->
-                <c1>1.0</c1>    <!-- linear scaling -->
-                <c2>1.95</c2>       <!-- angle scaling -->
-                <f>6</f>       <!-- one more scaling parameter -->
-                <fun>tan</fun>   <!-- one of sin,tan,id -->
-              </custom_function>
-              <scale_to_hfov>true</scale_to_hfov>  <!-- if it is set to `true` your horizontal FOV will ramain as defined, othervise it depends on lens type and custom function, if there is one -->
-              <!-- clip everything that is outside of this angle -->
-              <cutoff_angle>3.0</cutoff_angle>
-              <env_texture_size>512</env_texture_size> <!-- resolution of the cubemap texture, the highter it is - the sharper is your image -->
-            </lens>
-            <always_on>0</always_on>
+            <always_on>1</always_on>
             <update_rate>10</update_rate>
-            <visualize>false</visualize>
+            <visualize>1</visualize>
+            <save enabled="true">
+              <path>../frames/camera1</path>
+            </save>
+            <lens>
+              <type>stereographic</type>
+              <scale_to_hfov>1</scale_to_hfov>
+              <cutoff_angle>2</cutoff_angle>
+            </lens>
           </camera>
-      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
-        <alwaysOn>true</alwaysOn>
-        <updateRate>10.0</updateRate>
-        <cameraName>camera_1</cameraName>
-        <imageTopicName>image_raw</imageTopicName>
-        <cameraInfoTopicName>camera_1_info</cameraInfoTopicName>
-        <frameName>link</frameName>
-        <hackBaseline>0.07</hackBaseline>
-        <distortionK1>0.0</distortionK1>
-        <distortionK2>0.0</distortionK2>
-        <distortionK3>0.0</distortionK3>
-        <distortionT1>0.0</distortionT1>
-        <distortionT2>0.0</distortionT2>
-      </plugin>
+          <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+            <alwaysOn>true</alwaysOn>
+            <updateRate>10.0</updateRate>
+            <cameraName>camera_1</cameraName>
+            <imageTopicName>image_raw</imageTopicName>
+            <cameraInfoTopicName>camera_1_info</cameraInfoTopicName>
+            <frameName>link</frameName>
+            <hackBaseline>0.07</hackBaseline>
+            <distortionK1>0.0</distortionK1>
+            <distortionK2>0.0</distortionK2>
+            <distortionK3>0.0</distortionK3>
+            <distortionT1>0.0</distortionT1>
+            <distortionT2>0.0</distortionT2>
+          </plugin>
         </sensor>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
       </link>
     </model>
 
     <model name="camera_2">
       <static>true</static>
-      <pose>12.7938 -17.8808 10 0 -1.57 0</pose>
+      <pose>20 -15 12 0 0 2.2</pose>
       <link name="link">
         <visual name="visual">
           <geometry>
             <box>
-              <size>0.1 0.1 0.1</size>
+              <size>0.3 0.1 0.1</size>
             </box>
           </geometry>
         </visual>
-        <sensor name="camera" type="wideanglecamera">
+        <sensor name="camera" type="camera">
           <camera>
-            <horizontal_fov>3.14</horizontal_fov>
+            <horizontal_fov>2</horizontal_fov>
             <image>
-              <width>1920</width>
-              <height>1920</height>
+              <width>2000</width>
+              <height>2000</height>
             </image>
             <clip>
               <near>0.1</near>
               <far>100</far>
             </clip>
-            <lens>
-              <type>custom</type> 
-              <custom_function> <!-- manually defined mapping function r = c1*f*fun(theta/c2 + c3) More information here: https://en.wikipedia.org/wiki/Fisheye_lens#Mapping_function -->
-                <c1>1.0</c1>    <!-- linear scaling -->
-                <c2>1.95</c2>       <!-- angle scaling -->
-                <f>6</f>       <!-- one more scaling parameter -->
-                <fun>tan</fun>   <!-- one of sin,tan,id -->
-              </custom_function>
-              <scale_to_hfov>true</scale_to_hfov>  <!-- if it is set to `true` your horizontal FOV will ramain as defined, othervise it depends on lens type and custom function, if there is one -->
-              <!-- clip everything that is outside of this angle -->
-              <cutoff_angle>3.0</cutoff_angle>
-              <env_texture_size>512</env_texture_size> <!-- resolution of the cubemap texture, the highter it is - the sharper is your image -->
-            </lens>
-            <always_on>0</always_on>
+            <always_on>1</always_on>
             <update_rate>10</update_rate>
-            <visualize>false</visualize>
+            <visualize>1</visualize>
+            <save enabled="true">
+              <path>../frames/camera2</path>
+            </save>
+            <lens>
+              <type>stereographic</type>
+              <scale_to_hfov>1</scale_to_hfov>
+              <cutoff_angle>2</cutoff_angle>
+            </lens>
           </camera>
-      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
-        <alwaysOn>true</alwaysOn>
-        <updateRate>10.0</updateRate>
-        <cameraName>camera_2</cameraName>
-        <imageTopicName>image_raw</imageTopicName>
-        <cameraInfoTopicName>camera_2_info</cameraInfoTopicName>
-        <frameName>link</frameName>
-        <hackBaseline>0.07</hackBaseline>
-        <distortionK1>0.0</distortionK1>
-        <distortionK2>0.0</distortionK2>
-        <distortionK3>0.0</distortionK3>
-        <distortionT1>0.0</distortionT1>
-        <distortionT2>0.0</distortionT2>
-      </plugin>
+          <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+            <alwaysOn>true</alwaysOn>
+            <updateRate>10.0</updateRate>
+            <cameraName>camera_2</cameraName>
+            <imageTopicName>image_raw</imageTopicName>
+            <cameraInfoTopicName>camera_2_info</cameraInfoTopicName>
+            <frameName>link</frameName>
+            <hackBaseline>0.07</hackBaseline>
+            <distortionK1>0.0</distortionK1>
+            <distortionK2>0.0</distortionK2>
+            <distortionK3>0.0</distortionK3>
+            <distortionT1>0.0</distortionT1>
+            <distortionT2>0.0</distortionT2>
+          </plugin>
         </sensor>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
       </link>
     </model>
 
     <model name="camera_3">
       <static>true</static>
-      <pose>-31.9943 -23.3745 10 0 -1.57 0</pose>
+      <pose>-20 -20 12 0 0 0.7</pose>
       <link name="link">
         <visual name="visual">
           <geometry>
             <box>
-              <size>0.1 0.1 0.1</size>
+              <size>0.3 0.1 0.1</size>
             </box>
           </geometry>
         </visual>
-        <sensor name="camera" type="wideanglecamera">
+        <sensor name="camera" type="camera">
           <camera>
-            <horizontal_fov>3.14</horizontal_fov>
+            <horizontal_fov>2</horizontal_fov>
             <image>
-              <width>1920</width>
-              <height>1920</height>
+              <width>2000</width>
+              <height>2000</height>
             </image>
             <clip>
               <near>0.1</near>
               <far>100</far>
             </clip>
-            <lens>
-              <type>custom</type> 
-              <custom_function> <!-- manually defined mapping function r = c1*f*fun(theta/c2 + c3) More information here: https://en.wikipedia.org/wiki/Fisheye_lens#Mapping_function -->
-                <c1>1.0</c1>    <!-- linear scaling -->
-                <c2>1.95</c2>       <!-- angle scaling -->
-                <f>6</f>       <!-- one more scaling parameter -->
-                <fun>tan</fun>   <!-- one of sin,tan,id -->
-              </custom_function>
-              <scale_to_hfov>true</scale_to_hfov>  <!-- if it is set to `true` your horizontal FOV will ramain as defined, othervise it depends on lens type and custom function, if there is one -->
-              <!-- clip everything that is outside of this angle -->
-              <cutoff_angle>3.0</cutoff_angle>
-              <env_texture_size>512</env_texture_size> <!-- resolution of the cubemap texture, the highter it is - the sharper is your image -->
-            </lens>
-            <always_on>0</always_on>
+            <always_on>1</always_on>
             <update_rate>10</update_rate>
-            <visualize>false</visualize>
+            <visualize>1</visualize>
+            <save enabled="true">
+              <path>../frames/camera3</path>
+            </save>
+            <lens>
+              <type>stereographic</type>
+              <scale_to_hfov>1</scale_to_hfov>
+              <cutoff_angle>2</cutoff_angle>
+            </lens>
           </camera>
-      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
-        <alwaysOn>true</alwaysOn>
-        <updateRate>10.0</updateRate>
-        <cameraName>camera_3</cameraName>
-        <imageTopicName>image_raw</imageTopicName>
-        <cameraInfoTopicName>camera_3_info</cameraInfoTopicName>
-        <frameName>link</frameName>
-        <hackBaseline>0.07</hackBaseline>
-        <distortionK1>0.0</distortionK1>
-        <distortionK2>0.0</distortionK2>
-        <distortionK3>0.0</distortionK3>
-        <distortionT1>0.0</distortionT1>
-        <distortionT2>0.0</distortionT2>
-      </plugin>
+          <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+            <alwaysOn>true</alwaysOn>
+            <updateRate>10.0</updateRate>
+            <cameraName>camera_3</cameraName>
+            <imageTopicName>image_raw</imageTopicName>
+            <cameraInfoTopicName>camera_3_info</cameraInfoTopicName>
+            <frameName>link</frameName>
+            <hackBaseline>0.07</hackBaseline>
+            <distortionK1>0.0</distortionK1>
+            <distortionK2>0.0</distortionK2>
+            <distortionK3>0.0</distortionK3>
+            <distortionT1>0.0</distortionT1>
+            <distortionT2>0.0</distortionT2>
+          </plugin>
         </sensor>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
       </link>
     </model>
 
     <model name="camera_4">
       <static>true</static>
-      <pose>0 0 15 0 0 0</pose>
+      <pose>-20 20 12 0 0 -0.7</pose>
       <link name="link">
         <visual name="visual">
           <geometry>
             <box>
-              <size>0.1 0.1 0.1</size>
+              <size>0.3 0.1 0.1</size>
             </box>
           </geometry>
         </visual>
-        <sensor name="camera" type="wideanglecamera">
+        <sensor name="camera" type="camera">
           <camera>
-            <horizontal_fov>3.14</horizontal_fov>
+            <horizontal_fov>2</horizontal_fov>
             <image>
-              <width>1920</width>
-              <height>1920</height>
+              <width>2000</width>
+              <height>2000</height>
             </image>
             <clip>
               <near>0.1</near>
               <far>100</far>
             </clip>
-            <lens>
-              <type>custom</type> 
-              <custom_function> <!-- manually defined mapping function r = c1*f*fun(theta/c2 + c3) More information here: https://en.wikipedia.org/wiki/Fisheye_lens#Mapping_function -->
-                <c1>1.0</c1>    <!-- linear scaling -->
-                <c2>1.95</c2>       <!-- angle scaling -->
-                <f>6</f>       <!-- one more scaling parameter -->
-                <fun>tan</fun>   <!-- one of sin,tan,id -->
-              </custom_function>
-              <scale_to_hfov>true</scale_to_hfov>  <!-- if it is set to `true` your horizontal FOV will ramain as defined, othervise it depends on lens type and custom function, if there is one -->
-              <!-- clip everything that is outside of this angle -->
-              <cutoff_angle>3.0</cutoff_angle>
-              <env_texture_size>512</env_texture_size> <!-- resolution of the cubemap texture, the highter it is - the sharper is your image -->
-            </lens>
-            <always_on>0</always_on>
+            <always_on>1</always_on>
             <update_rate>10</update_rate>
-            <visualize>false</visualize>
+            <visualize>1</visualize>
+            <save enabled="true">
+              <path>../frames/camera4</path>
+            </save>
+            <lens>
+              <type>stereographic</type>
+              <scale_to_hfov>1</scale_to_hfov>
+              <cutoff_angle>2</cutoff_angle>
+            </lens>
           </camera>
-      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
-        <alwaysOn>true</alwaysOn>
-        <updateRate>10.0</updateRate>
-        <cameraName>camera_4</cameraName>
-        <imageTopicName>image_raw</imageTopicName>
-        <cameraInfoTopicName>camera_4_info</cameraInfoTopicName>
-        <frameName>link</frameName>
-        <hackBaseline>0.07</hackBaseline>
-        <distortionK1>0.0</distortionK1>
-        <distortionK2>0.0</distortionK2>
-        <distortionK3>0.0</distortionK3>
-        <distortionT1>0.0</distortionT1>
-        <distortionT2>0.0</distortionT2>
-      </plugin>
+          <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+            <alwaysOn>true</alwaysOn>
+            <updateRate>10.0</updateRate>
+            <cameraName>camera_4</cameraName>
+            <imageTopicName>image_raw</imageTopicName>
+            <cameraInfoTopicName>camera_4_info</cameraInfoTopicName>
+            <frameName>link</frameName>
+            <hackBaseline>0.07</hackBaseline>
+            <distortionK1>0.0</distortionK1>
+            <distortionK2>0.0</distortionK2>
+            <distortionK3>0.0</distortionK3>
+            <distortionT1>0.0</distortionT1>
+            <distortionT2>0.0</distortionT2>
+          </plugin>
         </sensor>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
       </link>
     </model>
 

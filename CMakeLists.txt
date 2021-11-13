@@ -102,7 +102,7 @@ catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES visnet
 #  CATKIN_DEPENDS other_catkin_pkg
-#  DEPENDS system_lib
+#  DEPENDS sensor_msgs opencv2 cv_bridge rospy std_msgs
 )
 
 ###########

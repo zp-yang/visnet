@@ -54,7 +54,11 @@
   <buildtool_depend>catkin</buildtool_depend>
   <depend>gazebo_ros</depend>
   <buildtool_depend>gazebo_ros</buildtool_depend>
-
+  <depend>sensor_msgs</depend>
+  <depend>opencv2</depend>
+  <depend>cv_bridge</depend>
+  <depend>rospy</depend>
+  <depend>std_msgs</depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

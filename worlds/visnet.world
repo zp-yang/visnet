@@ -71,7 +71,7 @@
             <always_on>1</always_on>
             <update_rate>10</update_rate>
             <visualize>1</visualize>
-            <save enabled="true">
+            <save enabled="false">
               <path>../frames/camera1</path>
             </save>
             <lens>
@@ -100,7 +100,7 @@
       </link>
     </model>
 
-    <model name="camera_2">
+    <!-- <model name="camera_2">
       <static>true</static>
       <pose>20 -15 12 0 0 2.2</pose>
       <link name="link">
@@ -125,7 +125,7 @@
             <always_on>1</always_on>
             <update_rate>10</update_rate>
             <visualize>1</visualize>
-            <save enabled="true">
+            <save enabled="false">
               <path>../frames/camera2</path>
             </save>
             <lens>
@@ -179,7 +179,7 @@
             <always_on>1</always_on>
             <update_rate>10</update_rate>
             <visualize>1</visualize>
-            <save enabled="true">
+            <save enabled="false">
               <path>../frames/camera3</path>
             </save>
             <lens>
@@ -233,7 +233,7 @@
             <always_on>1</always_on>
             <update_rate>10</update_rate>
             <visualize>1</visualize>
-            <save enabled="true">
+            <save enabled="false">
               <path>../frames/camera4</path>
             </save>
             <lens>
@@ -260,7 +260,7 @@
         <self_collide>0</self_collide>
         <kinematic>0</kinematic>
       </link>
-    </model>
+    </model> -->
 
     <model name="drone">
       <include>

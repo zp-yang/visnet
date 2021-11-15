@@ -84,24 +84,24 @@ def main(args):
   # Instead of MIL, you can also use
 
   tracker_names = ['BOOSTING', 'MIL','KCF', 'TLD', 'MEDIANFLOW', 'GOTURN', 'MOSSE', 'CSRT']
-  tracker_name = tracker_names[1]
+  tracker_name = tracker_names[2]
 
   if tracker_name == 'BOOSTING':
-      tracker = cv2.legacy.TrackerBoosting_create()
+      tracker = cv2.TrackerBoosting_create()
   if tracker_name == 'MIL':
-      tracker = cv2.legacy.TrackerMIL_create()
+      tracker = cv2.TrackerMIL_create()
   if tracker_name == 'KCF':
-      tracker = cv2.legacy.TrackerKCF_create()
+      tracker = cv2.TrackerKCF_create()
   if tracker_name == 'TLD':
-      tracker = cv2.legacy.TrackerTLD_create()
+      tracker = cv2.TrackerTLD_create()
   if tracker_name == 'MEDIANFLOW':
-      tracker = cv2.legacy.TrackerMedianFlow_create()
+      tracker = cv2.TrackerMedianFlow_create()
   if tracker_name == 'GOTURN':
-      tracker = cv2.legacy.TrackerGOTURN_create()
+      tracker = cv2.TrackerGOTURN_create()
   if tracker_name == 'MOSSE':
-      tracker = cv2.legacy.TrackerMOSSE_create()
+      tracker = cv2.TrackerMOSSE_create()
   if tracker_name == "CSRT":
-      tracker = cv2.legacy.TrackerCSRT_create()
+      tracker = cv2.TrackerCSRT_create()
 
   gzb_tracker = GzbObjTracker(tracker=tracker, tracker_name=tracker_name)
 

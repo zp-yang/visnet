@@ -100,7 +100,7 @@
       </link>
     </model>
 
-    <!-- <model name="camera_2">
+    <model name="camera_2">
       <static>true</static>
       <pose>20 -15 12 0 0 2.2</pose>
       <link name="link">
@@ -154,7 +154,7 @@
       </link>
     </model>
 
-    <model name="camera_3">
+ <!--   <model name="camera_3">
       <static>true</static>
       <pose>-20 -20 12 0 0 0.7</pose>
       <link name="link">

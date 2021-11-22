@@ -1,6 +1,5 @@
 import numpy as np
 
-
 # rotation correction between gazebo cam coordinates and literature convention
 R_model2cam = np.array([
         [0, 1, 0],
@@ -50,7 +49,7 @@ def so3_wedge(w):
     return -wx
 
 def so3_vee(wx):
-    w = np.array([wx[2,1], wx[0,2], w[1,0]])
+    w = np.array([wx[2,1], wx[0,2], wx[1,0]])
     return w
 
 eps = 1e-7    
@@ -69,7 +68,7 @@ def so3_exp(w):
 
 def so3_log(R):
     theta = np.arccos((np.linalg.trace(R) - 1) / 2)
-    return vee(C3(theta) * (R - R.T))
+    return so3_vee(C3(theta) * (R - R.T))
 
 def get_cam_in(cam_param):
     fx = cam_param[0]
@@ -106,3 +105,87 @@ def get_cam_mat_lie(cam_param, cam_pos, cam_att):
     cam_in = get_cam_in(cam_param)
     cam_ex = get_cam_ex_lie(cam_pos, cam_att)
     return cam_in @ cam_ex
+
+## Resampling based on the examples at: https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python/blob/master/12-Particle-Filters.ipynb
+## originally by Roger Labbe, under an MIT License
+def systematic_resample(weights):
+    n = len(weights)
+    positions = (np.arange(n) + np.random.uniform(0, 1)) / n
+    return create_indices(positions, weights)
+
+
+def stratified_resample(weights):
+    n = len(weights)
+    positions = (np.random.uniform(0, 1, n) + np.arange(n)) / n
+    return create_indices(positions, weights)
+
+
+def residual_resample(weights):
+    n = len(weights)
+    indices = np.zeros(n, np.uint32)
+    # take int(N*w) copies of each weight
+    num_copies = (n * weights).astype(np.uint32)
+    k = 0
+    for i in range(n):
+        for _ in range(num_copies[i]):  # make n copies
+            indices[k] = i
+            k += 1
+    # use multinormial resample on the residual to fill up the rest.
+    residual = weights - num_copies  # get fractional part
+    residual /= np.sum(residual)
+    cumsum = np.cumsum(residual)
+    cumsum[-1] = 1
+    indices[k:n] = np.searchsorted(cumsum, np.random.uniform(0, 1, n - k))
+    return indices
+
+
+def create_indices(positions, weights):
+    n = len(weights)
+    indices = np.zeros(n, np.uint32)
+    cumsum = np.cumsum(weights)
+    i, j = 0, 0
+    while i < n:
+        if positions[i] < cumsum[j]:
+            indices[i] = j
+            i += 1
+        else:
+            j += 1
+
+    return indices
+
+
+### end rlabbe's resampling functions
+
+# resample function from http://scipy-cookbook.readthedocs.io/items/ParticleFilter.html
+def resample(weights):
+    n = len(weights)
+    indices = []
+    C = [0.0] + [np.sum(weights[: i + 1]) for i in range(n)]
+    u0, j = np.random.random(), 0
+    for u in [(u0 + i) / n for i in range(n)]:
+        while u > C[j]:
+            j += 1
+        indices.append(j - 1)
+    return indices
+
+def squared_error(x, y, sigma=1):
+#     """
+#         RBF kernel, supporting masked values in the observation
+#         Parameters:
+#         -----------
+#         x : array (N,D) array of values | hypotheses
+#         y : array (N,D) array of values | measurements
+
+#         Returns:
+#         -------
+
+#         distance : scalar
+#             Total similarity, using equation:
+
+#                 d(x,y) = e^((-1 * (x - y) ** 2) / (2 * sigma ** 2))
+
+#             summed over all samples. Supports masked arrays.
+#     """  
+    dx = (x - y) ** 2
+    d = np.ma.sum(dx, axis=1)
+    return np.exp(-d / (2.0 * sigma ** 2))

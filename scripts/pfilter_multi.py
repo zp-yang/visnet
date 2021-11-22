@@ -4,6 +4,7 @@ Simple particle filter by johnhw
 """
 import numpy as np
 import numpy.ma as ma
+# from numba import jit, cuda
 
 # return a new function that has the heat kernel (given by delta) applied.
 def make_heat_adjusted(sigma):
@@ -85,7 +86,7 @@ def resample(weights):
 identity = lambda x: x
 
 
-# def squared_error(x, y, sigma=1):
+def squared_error(x, y, sigma=1):
 #     """
 #         RBF kernel, supporting masked values in the observation
 #         Parameters:
@@ -102,22 +103,7 @@ identity = lambda x: x
 #                 d(x,y) = e^((-1 * (x - y) ** 2) / (2 * sigma ** 2))
 
 #             summed over all samples. Supports masked arrays.
-#     """
-#     h = x.shape[1] # number of measurements per target
-#     j = y.shape[1] # total number of measurements from sensor
-#     num_targets = int(j / h)
-#     w = None
-#     for i in range(num_targets):
-#         dx = (x - y[0][i*num_targets:i*num_targets+h]) ** 2
-#         d = np.ma.sum(dx, axis=1)
-#         wi = np.exp(-d / (2.0 * sigma ** 2))
-#         if w is None:
-#             w = wi
-#         else:
-#             w = np.array([i if i>j else j for i,j in zip(w,wi)])
-#     return w
-
-def squared_error(x, y, sigma=1):  
+#     """  
     dx = (x - y) ** 2
     d = np.ma.sum(dx, axis=1)
     return np.exp(-d / (2.0 * sigma ** 2))
@@ -298,6 +284,7 @@ class ParticleFilter(object):
         else:
             self.particles[mask, :] = new_sample[mask, :]
 
+    # @jit(target="cpu")
     def update(self, observed=None, **kwargs):
         """Update the state of the particle filter given an observation.
         
@@ -318,8 +305,6 @@ class ParticleFilter(object):
             transform_fn(x, **kwargs)
         """
 
-        # apply dynamics
-        self.particles = self.dynamics_fn(self.particles, **kwargs)
 #         print('particle', self.particles.shape)
         # hypothesise observations
         self.hypotheses = self.observe_fn(self.particles, **kwargs)
@@ -328,7 +313,7 @@ class ParticleFilter(object):
             # compute similarity to observations
             # force to be positive
 
-            weights = self.weight_fn(
+            weights = self.weights * self.weight_fn(
                 self.hypotheses.reshape(self.n_particles, -1),
                 observed.reshape(1,-1),
                 **kwargs
@@ -403,3 +388,6 @@ class ParticleFilter(object):
             )
             self.resampled_particles = random_mask
             self.init_filter(mask=random_mask)
+
+         # apply dynamics
+        self.particles = self.dynamics_fn(self.particles, **kwargs)

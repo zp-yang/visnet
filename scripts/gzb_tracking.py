@@ -187,7 +187,7 @@ class GzbVisTracker:
                 print(e)
 
 def main(args):
-    gzb_vis_tracker = GzbVisTracker(n_cam=2, view=False)
+    gzb_vis_tracker = GzbVisTracker(n_cam=2, view=True)
 
     rospy.init_node('drone_tracker')
 

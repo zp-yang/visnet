@@ -85,58 +85,7 @@ class GzbPF():
         print(type(data), data.K)
         pass
     
-    # def observe_fn(x):
-    #     """
-    #     Parameters:
-    #         x : all particles at a step
-    #     Returns:
-    #         observations/measurements from x using the camera projection matrix
-    #     """
-    #     msmt = []
-    #     for xi in x:
-    #         vec = []
-    #         for node in cam_nodes:
-    #             p1 = node.get_measurement(xi[0:3])
-    #             p2 = node.get_measurement(xi[6:9])
-    #             vec = np.hstack([vec,p1, p2])
-    #         msmt.append(vec)
-    #     return np.array(msmt)/2000.0
-
-    # def dynamics_fn(x):
-    #     """
-    #     Parameters:
-    #         x : all particles at a time step
-    #     Returns:
-    #         x1: propagated particles
-    #     """
-        
-    #     dt = 1/10
-    #     A = np.block([
-    #         [np.eye(3), dt*np.eye(3)],
-    #         [np.zeros((3,3)), np.eye(3)]
-    #     ])
-    #     w = np.block([np.zeros(3), np.random.normal(0, 1, 3)])
-    #     n = x.shape[0]
-    #     A_block = np.block([[A, np.zeros((6,6))], [np.zeros((6,6)), A]])
-    #     w = np.zeros((12, n))
-    #     w[3:6, :] = np.random.normal(0, 1, (3, n))
-    #     w[9:12, :] = np.random.normal(0, 1, (3,n))
-    #     x1 = A_block @ x.T + w
-
-    #     return x1.T
-
-    # def prior_fn(n):
-    #     pos_x = np.random.uniform(-20, 20, (n,1))
-    #     pos_y = np.random.normal(-20, 20, (n,1))
-    #     pos_z = np.random.normal(10, 25, (n,1))
-    #     vel_x = np.random.normal(0, 1, (n,1))
-    #     vel_y = np.random.normal(0, 1, (n,1))
-    #     vel_z = np.zeros((n,1))
-    #     particles = np.hstack([pos_x, pos_y, pos_z, vel_x, vel_y, vel_z])
-    #     # particles = np.hstack([particles,particles])
     
-    #     return particles
-
 def main():
     gzb_pf = GzbPF(n_cam=2)
 

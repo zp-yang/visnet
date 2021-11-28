@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import numpy as np
 from numpy.lib.function_base import vectorize
 import roslib
@@ -5,7 +6,9 @@ roslib.load_manifest('visnet')
 import sys
 import rospy
 import cv2
-from std_msgs.msg import Int16MultiArray
+from std_msgs.msg import Int64MultiArray
+from visnet.msg import CamMsmt
+from rospy.numpy_msg import numpy_msg
 from sensor_msgs.msg import Image, CameraInfo
 from cv_bridge import CvBridge, CvBridgeError
 
@@ -135,8 +138,10 @@ class GzbVisTracker:
         
         self.detectors = []
         self.msmt_pubs = []
+
         if view: 
             self.img_pubs = []
+        
         self.img_subs = []
         self.cam_info_subs = []
 
@@ -149,7 +154,7 @@ class GzbVisTracker:
         for i in range(n_cam):
             camera_name = "camera_"+str(i+1)
             detector = Detector(subtractor_name="MOG2", view=view)
-            msmt_pub = rospy.Publisher(camera_name+"_msmt", Int16MultiArray, queue_size=2)
+            msmt_pub = rospy.Publisher(camera_name+"_msmt", CamMsmt, queue_size=2)
             
             self.detectors.append(detector)
             self.msmt_pubs.append(msmt_pub)
@@ -172,10 +177,11 @@ class GzbVisTracker:
         msmt_pub = cb_args[2]
 
         bboxes, frame = detector.detect(cv_img)
-        bboxes = np.array(bboxes)
-        msmt = Int16MultiArray()
-        msmt.data = bboxes
-        msmt_pub.publish(msmt)
+        bboxes = np.array(bboxes, dtype=np.int16).ravel()
+
+        data = CamMsmt()
+        data.msmts = bboxes
+        msmt_pub.publish(data)
         
         print(topic_name, bboxes)
         if frame is not None:
@@ -187,7 +193,7 @@ class GzbVisTracker:
                 print(e)
 
 def main(args):
-    gzb_vis_tracker = GzbVisTracker(n_cam=2, view=True)
+    gzb_vis_tracker = GzbVisTracker(n_cam=2, view=False)
 
     rospy.init_node('drone_tracker')
 

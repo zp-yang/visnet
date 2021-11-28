@@ -5,7 +5,7 @@ roslib.load_manifest('visnet')
 import sys
 import rospy
 import cv2
-from std_msgs.msg import Int16MultiArray
+from visnet.msg import CamMsmt
 from sensor_msgs.msg import CameraInfo
 # from nav_msgs.msg import Odometry
 import message_filters as mf
@@ -60,7 +60,7 @@ class GzbPF():
             cam_node = CameraNode(cam_param=cam_param, cam_pos=cam_pose[0:3], cam_att=cam_pose[3:6])
             self.cam_nodes.append(cam_node)
             cb_args = [camera_name, cam_node]
-            msmt_sub = mf.Subscriber(camera_name+"_msmt", Int16MultiArray)
+            msmt_sub = mf.Subscriber(camera_name+"_msmt", CamMsmt)
             self.msmt_subs.append(msmt_sub)
             
             # cam_info_cb_args = [camera_name, cam_node]
@@ -68,7 +68,7 @@ class GzbPF():
             # self.cam_info_subs.append(cam_info_sub)
         
         ts = mf.TimeSynchronizer(self.msmt_subs, queue_size=10)
-        ts.registerCallback(self.synced_callback, scb_args)
+        ts.registerCallback(self.synced_callback)
 
     
     # def callback(self, data, cb_args):
@@ -76,10 +76,12 @@ class GzbPF():
     #     print(cam_name)
 
 
-    def synced_callback(self, scb_data, scb_args):
-        print(len(scb_data))
-        for arg in scb_args:
-            print(arg[0])
+    def synced_callback(self, data1, data2):
+        
+        print("1: ", np.array(data1.msmts))
+        print("2: ", np.array(data2.msmts))
+        # for arg in scb_args:
+        #     print(arg[0])
 
     def cam_info_callback(self, data, cb_args):
         print(type(data), data.K)
@@ -87,9 +89,10 @@ class GzbPF():
     
     
 def main():
+    rospy.init_node('particle_filter')
     gzb_pf = GzbPF(n_cam=2)
 
-    rospy.init_node('particle_filter')
+    
 
     try:
         rospy.spin()

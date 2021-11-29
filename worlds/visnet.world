@@ -154,7 +154,7 @@
       </link>
     </model>
 
- <model name="camera_2">
+    <model name="camera_2">
       <static>true</static>
       <pose>-20 -20 12 0 0 0.7</pose>
       <link name="link">

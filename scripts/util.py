@@ -180,23 +180,10 @@ def resample(weights):
     return indices
 
 def squared_error(x, y, sigma=1):
-#     """
-#         RBF kernel, supporting masked values in the observation
-#         Parameters:
-#         -----------
-#         x : array (N,D) array of values | hypotheses
-#         y : array (N,D) array of values | measurements
-
-#         Returns:
-#         -------
-
-#         distance : scalar
-#             Total similarity, using equation:
-
-#                 d(x,y) = e^((-1 * (x - y) ** 2) / (2 * sigma ** 2))
-
-#             summed over all samples. Supports masked arrays.
-#     """  
+    """
+    Use gaussian probability distribution
+    x is the measurements, and y is the mean
+    """  
     dx = (x - y) ** 2
     d = np.ma.sum(dx, axis=1)
-    return np.exp(-d / (2.0 * sigma ** 2))
+    return np.exp(-d / (2.0 * sigma ** 2)) / np.sqrt(2*np.pi*sigma**2)

@@ -14,6 +14,9 @@ import message_filters as mf
 import pfilter_multi as pfilter
 import util
 
+import camera
+
+
 class CameraNode:
     def __init__(self, cam_param, cam_pos, cam_att):
         self.param = cam_param
@@ -50,12 +53,18 @@ class GzbPF():
             [-20, -20, 12, 0, 0, 0.7],
             [-20, 20, 12, 0, 0, -0.7],
         ])
-
+        
+        self.cam_group = camera.CamGroup(cam_param, cam_poses)
+        self.tracks = []
         self.cam_nodes = []
         self.msmt_subs = []
-        scb_args = []
+        
+        x0_1 = np.array([-20, -5, 20])
+        x0_2 = np.array([20, 5, 20])
+        tra
+        tracks = []
         for i in range(n_cam):
-            camera_name = "camera_"+str(i+1)
+            camera_name = "camera_"+str(i)
             cam_pose = cam_poses[i]
             cam_node = CameraNode(cam_param=cam_param, cam_pos=cam_pose[0:3], cam_att=cam_pose[3:6])
             self.cam_nodes.append(cam_node)
@@ -76,21 +85,33 @@ class GzbPF():
     #     print(cam_name)
 
 
-    def synced_callback(self, data1, data2):
-        
-        print("1: ", np.array(data1.msmts))
-        print("2: ", np.array(data2.msmts))
-        # for arg in scb_args:
-        #     print(arg[0])
+    def synced_callback(self, *args):
+        z = []
+        for m, data in enumerate(args):
 
-    def cam_info_callback(self, data, cb_args):
-        print(type(data), data.K)
-        pass
+            labels = np.array(data.labels)
+            msmts = np.array(data.msmts)
+            if msmts.shape[0] == 0:
+                msmts = np.array([-1,-1])
+            else:
+                msmts = msmts.reshape(int(msmts.shape[0]/4), 4)
+                
+                x = msmts[:,0] + 0.5*msmts[:,2]
+                y = msmts[:,1] + 0.5*msmts[:,3]
+                a = msmts[:,2] * msmts[:,3]
+                msmts = np.vstack([x,y, a]).T
+            z.append(msmts)
+            print("camera {}: {}".format(m, msmts))
+
+
+    # def cam_info_callback(self, data, cb_args):
+    #     print(type(data), data.K)
+    #     pass
     
     
 def main():
     rospy.init_node('particle_filter')
-    gzb_pf = GzbPF(n_cam=2)
+    gzb_pf = GzbPF(n_cam=4)
 
     
 

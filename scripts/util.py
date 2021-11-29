@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.core.numeric import indices
 
 # rotation correction between gazebo cam coordinates and literature convention
 R_model2cam = np.array([
@@ -111,7 +112,17 @@ def get_cam_mat_lie(cam_param, cam_pos, cam_att):
 def systematic_resample(weights):
     n = len(weights)
     positions = (np.arange(n) + np.random.uniform(0, 1)) / n
-    return create_indices(positions, weights)
+
+    indices = np.zeros(n, 'i')
+    cumsum = np.cumsum(weights)
+    i, j = 0, 0
+    while i < n:
+        if positions[i] < cumsum[j]:
+            indices[i] = j
+            i += 1
+        else:
+            j += 1
+    return indices
 
 
 def stratified_resample(weights):

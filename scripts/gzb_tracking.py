@@ -152,7 +152,7 @@ class GzbVisTracker:
         # self.img_sub1 = rospy.Subscriber("camera_1/image_raw", Image, self.callback, ['cam1', self.detector1, self.msmt_pub1, self.img_pub1])
         """
         for i in range(n_cam):
-            camera_name = "camera_"+str(i+1)
+            camera_name = "camera_"+str(i)
             detector = Detector(subtractor_name="MOG2", view=view)
             msmt_pub = rospy.Publisher(camera_name+"_msmt", CamMsmt, queue_size=2)
             
@@ -161,7 +161,7 @@ class GzbVisTracker:
 
             cb_args = [camera_name, detector, msmt_pub]
             if view:
-                img_pub = rospy.Publisher("tracked_view_"+str(i+1), Image,queue_size=5)
+                img_pub = rospy.Publisher("tracked_view_"+str(i), Image,queue_size=5)
                 self.img_subs.append(img_pub)
 
                 cb_args.append(img_pub)
@@ -183,7 +183,7 @@ class GzbVisTracker:
         data.msmts = bboxes
         msmt_pub.publish(data)
         
-        print(topic_name, bboxes)
+        # print(topic_name, bboxes)
         if frame is not None:
             try:
                 img_pub = cb_args[3]
@@ -193,9 +193,8 @@ class GzbVisTracker:
                 print(e)
 
 def main(args):
-    gzb_vis_tracker = GzbVisTracker(n_cam=2, view=False)
-
     rospy.init_node('drone_tracker')
+    gzb_vis_tracker = GzbVisTracker(n_cam=4, view=True)  
 
     try:
         rospy.spin()

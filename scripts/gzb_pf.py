@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import numpy as np
 from numpy.lib.function_base import vectorize
 import roslib
@@ -61,7 +62,7 @@ class GzbPF():
         
         x0_1 = np.array([-20, -5, 20])
         x0_2 = np.array([20, 5, 20])
-        tra
+        
         tracks = []
         for i in range(n_cam):
             camera_name = "camera_"+str(i)
@@ -72,27 +73,19 @@ class GzbPF():
             msmt_sub = mf.Subscriber(camera_name+"_msmt", CamMsmt)
             self.msmt_subs.append(msmt_sub)
             
-            # cam_info_cb_args = [camera_name, cam_node]
-            # cam_info_sub = rospy.Subscriber(camera_name+"/"+camera_name+"_info", CameraInfo, self.cam_info_callback, cam_info_cb_args)
-            # self.cam_info_subs.append(cam_info_sub)
         
         ts = mf.TimeSynchronizer(self.msmt_subs, queue_size=10)
         ts.registerCallback(self.synced_callback)
-
-    
-    # def callback(self, data, cb_args):
-    #     cam_name = cb_args[0]
-    #     print(cam_name)
-
 
     def synced_callback(self, *args):
         z = []
         for m, data in enumerate(args):
 
             labels = np.array(data.labels)
+            print(labels)
             msmts = np.array(data.msmts)
             if msmts.shape[0] == 0:
-                msmts = np.array([-1,-1])
+                msmts = np.array([-1,-1,-1])
             else:
                 msmts = msmts.reshape(int(msmts.shape[0]/4), 4)
                 
@@ -101,12 +94,9 @@ class GzbPF():
                 a = msmts[:,2] * msmts[:,3]
                 msmts = np.vstack([x,y, a]).T
             z.append(msmts)
-            print("camera {}: {}".format(m, msmts))
+            # print("camera {}: {}".format(m, msmts))
 
 
-    # def cam_info_callback(self, data, cb_args):
-    #     print(type(data), data.K)
-    #     pass
     
     
 def main():

@@ -2,6 +2,7 @@
 
 # from io import open_code
 import numpy as np
+from numpy.core.arrayprint import printoptions
 from numpy.linalg import pinv
 from genpy.rostime import Duration
 import rospy 
@@ -12,11 +13,17 @@ import geometry_msgs.msg
 import tf2_ros
 from concurrent.futures import ThreadPoolExecutor
 
+from tf.transformations import quaternion_from_euler
+
 def target_traj_circle(t, begin, end, duration):
-    x = 15*np.sin(2 * np.pi * 0.01 * t / 3)
-    y = 10*np.cos(2 * np.pi * 0.01 * t / 3)
-    z = 20
-    return np.array([x,y,z])
+    theta = 2 * np.pi * 0.1 * t / 3 + np.arctan2(begin[1],begin[0])
+    x = 19*np.sin(theta)
+    y = 14*np.cos(theta)
+    z = begin[2]
+    yaw = -(theta + np.pi/2)
+    pos = np.array([x, y, z])
+    # return pos
+    return np.array([x,y,z, 0, 0, yaw])
 
 def target_traj_straight(t, begin, end, duration):
     max_dist = np.linalg.norm(begin-end)
@@ -25,18 +32,18 @@ def target_traj_straight(t, begin, end, duration):
 
     if t > duration:
         pos = end
-
-    return pos
+    att = np.array([0,0,0])
+    # return pos
+    return np.concatenate([pos, att])
 
 def set_drone_state(*args):
     args = args[0]
-
     model_name = args[0]
     traj_fn = args[1]
     begin = args[2]
     end = args[3]
     duration = args[4]
-
+    
     br = tf2_ros.TransformBroadcaster()
     state_msg_0 = ModelState()
     state_msg_0.model_name = model_name
@@ -59,14 +66,18 @@ def set_drone_state(*args):
         elapsed = (now - start).to_sec()
         rospy.wait_for_service('/gazebo/set_model_state')
         try:
-            # state_msg_0.pose.position.x = 10*np.sin(2*np.pi*elapsed*0.05)
-            # state_msg_0.pose.position.y = 15*np.cos(2*np.pi*elapsed*0.05)
-            pos = traj_fn(elapsed, begin, end, duration)
+            pose = traj_fn(elapsed, begin, end, duration)
             # print(elapsed, pos)
-            state_msg_0.pose.position.x = pos[0]
-            state_msg_0.pose.position.y = pos[1]
-            state_msg_0.pose.position.z = pos[2]
-
+            state_msg_0.pose.position.x = pose[0]
+            state_msg_0.pose.position.y = pose[1]
+            state_msg_0.pose.position.z = pose[2]
+            
+            q_ = quaternion_from_euler(pose[3], pose[4], pose[5])
+            state_msg_0.pose.orientation.x = q_[0]
+            state_msg_0.pose.orientation.y = q_[1]
+            state_msg_0.pose.orientation.z = q_[2]
+            state_msg_0.pose.orientation.w = q_[3]
+            
             set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState)
             resp = set_state( state_msg_0 )
             t = geometry_msgs.msg.TransformStamped()
@@ -93,11 +104,14 @@ def main():
     x0_2 = np.array([20, 5, 20])
 
     executor_args = [
-        ["drone_0", target_traj_straight, x0_1, x0_1+[40,0,0], 30], 
-        ["drone_1", target_traj_straight, x0_2, x0_2+[-40,0,0], 30],
-        ]
+        # ["drone_0", target_traj_straight, x0_1, x0_1+[40,0,0], 30], 
+        # ["drone_1", target_traj_straight, x0_2, x0_2+[-40,0,0], 30],
+        ["drone_0", target_traj_circle, [-10, 0, 18], [-10, 0, 18], 30],
+        ["bird", target_traj_circle, [10,0,10], [10,0,10], 30],
+    ]
     
-    with ThreadPoolExecutor(max_workers=2) as tpe:
+    with ThreadPoolExecutor(max_workers=5) as tpe:
+        print("started")
         tpe.map(set_drone_state, executor_args)
 
     rospy.spin()

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import numpy as np
+from numpy.core.fromnumeric import shape
 from numpy.lib.function_base import vectorize
 import roslib
 roslib.load_manifest('visnet')
@@ -57,32 +58,81 @@ class Detector:
         self.timer = cv2.getTickCount()
 
         orig_frame = frame.copy()
+
+        hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        red_lower = np.array([136, 87, 111], np.uint8)
+        red_upper = np.array([180, 255, 255], np.uint8)
+        red_mask = cv2.inRange(hsv_frame, red_lower, red_upper)
+
+        green_lower = np.array([40, 40, 40], np.uint8)
+        green_upper = np.array([70, 255, 255], np.uint8)
+        green_mask = cv2.inRange(hsv_frame, green_lower, green_upper)
+
+        kernal = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(11,11))
+        # kernal = np.ones((5, 5), "uint8") # squre kernal
+        
+        # For red color (bird)
+        red_mask = cv2.dilate(red_mask, kernal, iterations=2)
+        
+        # For green color (drone)
+        green_mask = cv2.dilate(green_mask, kernal, iterations=2)
+
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        frame = cv2.GaussianBlur(frame, (21, 21), 0)
+        frame = cv2.GaussianBlur(frame, (7, 7), 0)
         fg_mask = self.back_subtractor.apply(frame)
 
-        th, fg_binary = cv2.threshold(fg_mask, 120, 255, cv2.THRESH_BINARY)
-        contours, hierachy = cv2.findContours(fg_binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        th, fg_binary = cv2.threshold(fg_mask, 80, 255, cv2.THRESH_BINARY)
+        fg_binary = cv2.dilate(fg_binary, kernal, iterations=1)
 
-        bboxes = []
-        for contour in contours:
-            # print(contour.shape)
+        red_motion_mask = cv2.bitwise_and(red_mask, fg_binary)
+        green_motion_mask = cv2.bitwise_and(green_mask, fg_binary)
+
+        red_contours, _ = cv2.findContours(red_motion_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        green_contours, _ = cv2.findContours(green_motion_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        blob_bboxes = []
+        red_bboxes = []
+        blob_thresh = 400
+        for contour in red_contours:
             (x, y, w, h) = cv2.boundingRect(contour)
-            cv2.rectangle(orig_frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
-            bboxes.append([x, y, w, h])
+            if w * h > blob_thresh:
+                cv2.rectangle(orig_frame, (x, y), (x+w, y+h), (0, 0, 255), 2)
+                cv2.putText(orig_frame, "bird", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 255))  
+                red_bboxes.append([x, y, w, h])
+            else:
+                cv2.rectangle(orig_frame, (x, y), (x+w, y+h), (0, 0, 0), 2)
+                cv2.putText(orig_frame, "BLOB", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 0))  
+                blob_bboxes.append([x, y, w, h])
+
+        green_bboxes = []
+        for contour in green_contours:
+            (x, y, w, h) = cv2.boundingRect(contour)
+            if w * h > blob_thresh:
+                cv2.rectangle(orig_frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+                cv2.putText(orig_frame, "drone", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0))  
+                green_bboxes.append([x, y, w, h])
+            else:
+                cv2.rectangle(orig_frame, (x, y), (x+w, y+h), (0, 0, 0), 2)
+                cv2.putText(orig_frame, "BLOB", (x, y), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 0, 0))  
+                blob_bboxes.append([x, y, w, h])
+
+        bboxes = {'bird':red_bboxes, 'drone':green_bboxes, 'blob':blob_bboxes}
         fps = cv2.getTickFrequency() / (cv2.getTickCount() - self.timer)
         self.bboxes = bboxes
-
         if self.view:
-            cv2.putText(orig_frame, self.subtractor_name + " Subtractor",
-                        (100, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50, 170, 50), 2)
+            # cv2.putText(orig_frame, self.subtractor_name + " Subtractor",
+            #             (100, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50, 170, 50), 2)
 
             # Display FPS on frame
-            cv2.putText(orig_frame, "FPS : " + str(int(fps)), (100, 50),
+            cv2.putText(orig_frame, "FPS : " + str(int(fps)), (100, 20),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.75, (50, 170, 50), 2)
 
-            # cv2.imshow('Motion Detection', orig_frame)
-            # k = cv2.waitKey(3) & 0xff
+            cv2.imshow('Motion Detection', orig_frame)
+            cv2.imshow("Motion Mask Red", red_motion_mask)
+            # cv2.imshow("Motion Mask Green", green_motion_mask)
+            cv2.imshow("Motion Mask", fg_binary)
+            cv2.imshow("FG Mask", fg_mask)
+            k = cv2.waitKey(3) & 0xff
             # print(k)
             return bboxes, orig_frame      
         return bboxes, None
@@ -145,12 +195,6 @@ class GzbVisTracker:
         self.img_subs = []
         self.cam_info_subs = []
 
-        """
-        # self.detector1 = Detector(subtractor_name="MOG2", view=view)
-        # self.img_pub1 = rospy.Publisher("tracked_view1", Image, queue_size=5)
-        # self.msmt_pub1 = rospy.Publisher("bbox1", Int16MultiArray)
-        # self.img_sub1 = rospy.Subscriber("camera_1/image_raw", Image, self.callback, ['cam1', self.detector1, self.msmt_pub1, self.img_pub1])
-        """
         for i in range(n_cam):
             camera_name = "camera_"+str(i)
             detector = Detector(subtractor_name="MOG2", view=view)
@@ -177,10 +221,21 @@ class GzbVisTracker:
         msmt_pub = cb_args[2]
 
         bboxes, frame = detector.detect(cv_img)
-        bboxes = np.array(bboxes, dtype=np.int16).ravel()
+        bird_bboxes = np.array(bboxes['bird'], dtype=np.int16).ravel()
+        drone_bboxes = np.array(bboxes['drone'], dtype=np.int16).ravel()
+        msmts = np.concatenate([drone_bboxes, bird_bboxes])
 
+        bird_labels = np.zeros(int(bird_bboxes.shape[0]/4))
+        drone_labels = np.ones(int(drone_bboxes.shape[0]/4))
+        labels = np.concatenate([drone_labels, bird_labels])
+        labels = labels.astype(np.int16)
+
+        # print("labels", labels.shape)
+        # print("msmts: ", msmts.shape)
         data = CamMsmt()
-        data.msmts = bboxes
+    
+        data.labels = labels.tolist()
+        data.msmts = msmts.tolist()
         msmt_pub.publish(data)
         
         # print(topic_name, bboxes)
@@ -194,7 +249,7 @@ class GzbVisTracker:
 
 def main(args):
     rospy.init_node('drone_tracker')
-    gzb_vis_tracker = GzbVisTracker(n_cam=4, view=True)  
+    gzb_vis_tracker = GzbVisTracker(n_cam=1, view=True)  
 
     try:
         rospy.spin()

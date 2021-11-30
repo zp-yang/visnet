@@ -266,7 +266,7 @@
       <include>
         <uri>model://iris_with_standoffs</uri>
         <pose>0 0 1 0 0 0</pose>
-        <name>drone</name>
+        <name>drone_0</name>
       </include>
     </model>
 
@@ -274,8 +274,35 @@
       <include>
         <uri>model://iris_with_standoffs</uri>
         <pose>1 0 1 0 0 0</pose>
-        <name>drone</name>
+        <name>drone_1</name>
       </include>
+    </model>
+
+    <model name="bird">
+      <pose>0 0 10 0 0 0</pose>
+      <link name="bird_body">
+        <visual name="bird_visual">
+          <geometry>
+            <mesh>
+              <uri>../models/Eagle.dae</uri>
+              <scale>1 1 1</scale>
+            </mesh>
+          </geometry>
+          <material>
+            <ambient>1 0.1 0.1 1</ambient>
+            <diffuse>1 0.1 0.2 1</diffuse>
+            <specular>1 0 0 0</specular>
+            <emissive>0.5 0 0 1</emissive>
+          </material>
+        </visual>
+        <collision name="bird_collision">
+          <geometry>
+            <box>
+              <size>1 1 1</size>
+            </box>
+          </geometry>
+        </collision>
+      </link>
     </model>
 
     <gui fullscreen='0'>

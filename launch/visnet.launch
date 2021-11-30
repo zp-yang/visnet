@@ -9,7 +9,7 @@
   </include>
   <!-- <node name="record" pkg="rosbag" type="record" args="record -o visnet.bag /tf /camera_1/image_raw /camera_2/image_raw /camera_3/image_raw /camera_4/image_raw" output="screen"/> -->
   <node pkg="visnet" name="set_model_state" type="set_model_state.py" output="screen"/> 
-  <node pkg="visnet" name="gzb_tracker" type="gzb_tracking.py" output="screen"/> 
+  <!-- <node pkg="visnet" name="gzb_tracker" type="gzb_tracking.py" output="screen"/>  -->
   <node type="rviz" name="rviz" pkg="rviz" args="-d $(find visnet)/config/visnet.rviz" />
 </launch>
 <!-- vim: set et fenc=utf-8 ff=unix ft=xml sts=0 sw=2 ts=2 : -->

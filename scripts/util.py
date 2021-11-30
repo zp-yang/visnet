@@ -33,9 +33,12 @@ def euler2dcm(euler):
     dcm = R1 @ R2 @ R3
     return dcm
 
-def cart2hom(point):
-#     print(point.shape, point)
-    return np.hstack([point,1.0])
+def cart2hom(points):
+    """
+    points shape should be (3, n)
+    """
+    n_points = points.shape[1]
+    return np.vstack([points, np.ones(n_points)])
 
 def hom2cart(coord):
     coord = coord[0:-1]/coord[-1]

@@ -1,3 +1,4 @@
+from numpy.core.arrayprint import printoptions
 import util
 import numpy as np
 class Camera:
@@ -7,10 +8,14 @@ class Camera:
         self.att = cam_att
         self.R_cam = util.so3_exp(self.att)
         self.K = util.get_cam_in(self.param)
-        self.R = util.R_model2cam @ self.R_cam # this rotation is kinda goofy but works, TODO: maybe
+
+        # this rotation is kinda goofy but corrects the gazebo convention and literature convention
+        self.R = util.R_model2cam @ self.R_cam 
+        
         self.P = util.get_cam_mat_lie(self.param, self.pos, self.att)
-        self.range = 20 # meters
+        self.range = 25 # meters
         self.fov = np.deg2rad(90) #degrees, both directions
+        self.bound = 2000
         
     def __repr__(self):
         return "param: {}, pos: {}, att: {}".format(self.param, self.pos, self.att)
@@ -19,33 +24,36 @@ class Camera:
         return self.P @ util.cart2hom(target_pos)
     
     def _get_pixel_pos(self, target_pos):
-        return util.hom2cart(self._get_pixel_pos_hom(target_pos))
+        pix_hom = self._get_pixel_pos_hom(target_pos)
+        pix_cart = pix_hom[0:-1, :] / pix_hom[-1,:]
+        return pix_cart
     
     def _get_distance(self, target_pos):
         """
         !!!Should not be used directly in estimation!!!
+        target_pos: (n, 3)
         """
-        dist =  np.linalg.norm(target_pos-self.pos)
+        dist =  np.linalg.norm(target_pos-self.pos, axis=1)
         return dist
     
     def get_bearing(self, target_pos):
         """
-        considers the FOV and range of the camera
-        Outside FOV - no measurement
-        Outside range - no label.
-        """
-        # check FOV on x & y axis of the camera frame
-        dist = self._get_distance(target_pos)
-        vec = self.R_cam @ (target_pos - self.pos) / dist
-        ang1 = np.arctan2(vec[2], vec[0])
-        ang2 = np.arctan2(vec[1], vec[0])
-        if not(ang1 < self.fov/2 and ang1 > -self.fov/2) or not(ang2 < self.fov/2 and ang2 > -self.fov/2) :
-            return np.array([-1, -1])
-        
+        Check if projectd pixel is within the picture bounds
+        target_pos should be (3, n) shaped
+        """        
         bearing = self._get_pixel_pos(target_pos)
-        # if dist > self.range:
-        #     return self.add_pixel_noise(bearing, sigma=20).reshape((1,2))
-        return self.add_pixel_noise(bearing, sigma=10)
+        
+        mask = (bearing > 0) & (bearing < self.bound)
+        mask = mask[0] & mask[1] # True if within bound, False if out of bound
+        indices = np.where(mask==False)[0] # Find the indices of target that are out of bound
+        
+        n = bearing.shape[1]
+        
+        # add noise to the pixel locations due to varying bounding box size
+        bearing = bearing + np.random.normal(0, 10, size=(2, n))
+        
+        bearing[:, indices] = np.array([-1, -1]).reshape(2,1)
+        return bearing, indices
         
     def add_pixel_noise(self, pixel_coord, sigma=5):
         return pixel_coord + np.random.normal(0, sigma, size=[1,2])
@@ -59,7 +67,6 @@ class CamNode(Camera):
         """
         Back projected ray from the camera to the target (approximate)
         """
-        pixel_coord = self.add_pixel_noise(pixel_pos)
         K = self.K
         R = self.R
         Bp = np.linalg.inv(K @ R)
@@ -72,31 +79,17 @@ class CamNode(Camera):
         Bearing measurements in pixel coordinate (and target identity: drone, bird, unknown) 
         The input here is temporary until we have trained the neural net to actually identify targets
         """
-        
-        msmts = np.empty([0,3])
-        for target_pos, label in zip(targets, labels):
-            rand = np.random.rand()
-            dist = self._get_distance(target_pos=target_pos)
-            bearing = self.get_bearing(target_pos).reshape((1,2)).ravel()
-            
-            if bearing[0] < 0 or dist > self.range: # no measurement or outside range, no label
-                label = 0
-            elif rand < 0.2: # 80% chance of giving a correct measurement
-                label = np.random.randint(low=0, high=3)
-            else: # not outside range and correctly classified
-                label = label
-            
-            measurement = np.hstack([bearing, label])
-            msmts = np.vstack([msmts, measurement])
+        bearing, oob_indices = self.get_bearing(targets.T)
 
-        # add false alerts
-        # rand = np.random.uniform()
-        # if rand < -0.1:
-        #     n_false_alert = np.random.randint(0, self.max_false_alert)
-        #     bearing = np.vstack([bearing, np.random.uniform(0, 2000, size=(n_false_alert,2))])
-        
-        # return np.hstack([bearing, label])
-        return msmts
+        dist = self._get_distance(targets)
+        dist_mask = dist > self.range
+        oor_indices = np.where(dist_mask==True) # find targets that are out of range
+
+        labels[oob_indices] = -1
+        labels[oor_indices] = -1
+        msmts = np.vstack([bearing, labels])
+
+        return msmts.T
 
 class CamGroup():
     def __init__(self, cam_param, cam_poses):
@@ -105,17 +98,11 @@ class CamGroup():
         self.cam_poses = cam_poses
         self.cam_nodes = [CamNode(cam_param, poses[0:3], poses[3:6]) for poses in cam_poses]
         
-    def get_group_measurement(self, targets, labels, hypo_mode=False):
+    def get_group_measurement(self, targets, labels):
         z = []
         for node in self.cam_nodes:
-            z.append(node.get_measurement(targets, labels))
-        
-        if hypo_mode: # each cam only gives one measurement of a particle
-            return z
-        else: # for simulation where each cam can have false measurments
-            # TODO Add noisy measurements?
-            
-            return z
+            z.append(node.get_measurement(targets, labels))    
+        return z
             
 
 cam_param = [642.0926, 642.0926, 1000.5, 1000.5,0]

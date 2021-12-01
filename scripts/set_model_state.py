@@ -26,12 +26,17 @@ def target_traj_circle(t, begin, end, duration):
     return np.array([x,y,z, 0, 0, yaw])
 
 def target_traj_straight(t, begin, end, duration):
+    trip = int(t / duration)
+
+    if (trip % 2): # odd trip
+        temp = begin
+        begin = end
+        end = temp
+
     max_dist = np.linalg.norm(begin-end)
     v_max = (end-begin) / duration
-    pos = begin + v_max * t
+    pos = begin + v_max * (t - trip*duration)
 
-    if t > duration:
-        pos = end
     att = np.array([0,0,0])
     # return pos
     return np.concatenate([pos, att])
@@ -104,9 +109,9 @@ def main():
     x0_2 = np.array([20, 5, 20])
 
     executor_args = [
-        # ["drone_0", target_traj_straight, x0_1, x0_1+[40,0,0], 30], 
+        ["drone_0", target_traj_straight, x0_1, x0_1+[40,0,0], 60], 
         # ["drone_1", target_traj_straight, x0_2, x0_2+[-40,0,0], 30],
-        ["drone_0", target_traj_circle, [-10, 0, 18], [-10, 0, 18], 30],
+        # ["drone_0", target_traj_circle, [-10, 0, 18], [-10, 0, 18], 30],
         ["bird", target_traj_circle, [10,0,10], [10,0,10], 30],
     ]
     

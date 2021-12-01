@@ -69,7 +69,7 @@
               <far>100</far>
             </clip>
             <always_on>1</always_on>
-            <update_rate>10</update_rate>
+            <update_rate>20</update_rate>
             <visualize>1</visualize>
             <save enabled="false">
               <path>../frames/camera0</path>
@@ -82,7 +82,7 @@
           </camera>
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
             <alwaysOn>true</alwaysOn>
-            <updateRate>10.0</updateRate>
+            <updateRate>20.0</updateRate>
             <cameraName>camera_0</cameraName>
             <imageTopicName>image_raw</imageTopicName>
             <cameraInfoTopicName>camera_0_info</cameraInfoTopicName>
@@ -123,7 +123,7 @@
               <far>100</far>
             </clip>
             <always_on>1</always_on>
-            <update_rate>10</update_rate>
+            <update_rate>20</update_rate>
             <visualize>1</visualize>
             <save enabled="false">
               <path>../frames/camera1</path>
@@ -136,7 +136,7 @@
           </camera>
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
             <alwaysOn>true</alwaysOn>
-            <updateRate>10.0</updateRate>
+            <updateRate>20.0</updateRate>
             <cameraName>camera_1</cameraName>
             <imageTopicName>image_raw</imageTopicName>
             <cameraInfoTopicName>camera_1_info</cameraInfoTopicName>
@@ -177,7 +177,7 @@
               <far>100</far>
             </clip>
             <always_on>1</always_on>
-            <update_rate>10</update_rate>
+            <update_rate>20</update_rate>
             <visualize>1</visualize>
             <save enabled="false">
               <path>../frames/camera_2</path>
@@ -190,7 +190,7 @@
           </camera>
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
             <alwaysOn>true</alwaysOn>
-            <updateRate>10.0</updateRate>
+            <updateRate>20.0</updateRate>
             <cameraName>camera_2</cameraName>
             <imageTopicName>image_raw</imageTopicName>
             <cameraInfoTopicName>camera_2_info</cameraInfoTopicName>
@@ -231,7 +231,7 @@
               <far>100</far>
             </clip>
             <always_on>1</always_on>
-            <update_rate>10</update_rate>
+            <update_rate>20</update_rate>
             <visualize>1</visualize>
             <save enabled="false">
               <path>../frames/camera_3</path>
@@ -244,7 +244,7 @@
           </camera>
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
             <alwaysOn>true</alwaysOn>
-            <updateRate>10.0</updateRate>
+            <updateRate>20.0</updateRate>
             <cameraName>camera_3</cameraName>
             <imageTopicName>image_raw</imageTopicName>
             <cameraInfoTopicName>camera_3_info</cameraInfoTopicName>

@@ -170,18 +170,6 @@ def create_indices(positions, weights):
 
 ### end rlabbe's resampling functions
 
-# resample function from http://scipy-cookbook.readthedocs.io/items/ParticleFilter.html
-def resample(weights):
-    n = len(weights)
-    indices = []
-    C = [0.0] + [np.sum(weights[: i + 1]) for i in range(n)]
-    u0, j = np.random.random(), 0
-    for u in [(u0 + i) / n for i in range(n)]:
-        while u > C[j]:
-            j += 1
-        indices.append(j - 1)
-    return indices
-
 def squared_error(x, y, sigma=1):
     """
     Use gaussian probability distribution
@@ -189,4 +177,94 @@ def squared_error(x, y, sigma=1):
     """  
     dx = (x - y) ** 2
     d = np.ma.sum(dx, axis=1)
-    return np.exp(-d / (2.0 * sigma ** 2)) / np.sqrt(2*np.pi*sigma**2)
+    return np.exp(-d / (2.0 * sigma ** 2)) / np.sqrt(2 * np.pi * sigma**2)
+
+
+def msmt_association(measurements, map_hypothesis, sigma=30):
+    """
+    Parameters:
+    -----------
+    measurements: shape: (n_measurements, 2+1)
+        From the m-th camera, 
+    map_hypothesis: shape: (n_targets, 2+1)
+        State hypothesis on cameras at t-1 of all tracked objects, 
+
+    RETURN:
+    msmt_m: 
+        Associated measurements of m-th camera, order in the same way as the targets. |msmt_m[i] <-> tracks[i]|
+    """
+
+    msmt_m = []
+    argmaxes = []
+    for hi in map_hypothesis:
+        w = squared_error(measurements, hi, sigma=sigma)
+        argmax_w = np.argmax(w)
+        argmaxes.append(argmax_w)
+        msmt_m.append(measurements[argmax_w])
+    
+    return np.array(msmt_m), argmaxes
+
+def observe_fn(cam_group, particles):
+        """
+        Parameters:
+            @ particles : all particles of a track
+        Returns:
+            @ hypothesis from x using the camera projection matrix
+            This returns list of arrays which corresponds to hypothesis of particles on each camera
+            |hypo[i] <-> camera[i]|
+        """
+
+        pos = particles[:, 0:3]
+        labels = particles[:, -1]
+        hypothesis = cam_group.get_group_measurement(pos, labels)
+
+        return hypothesis
+
+def weight_fn(msmt, hypo, sigma, verbose=False):
+        """
+        Iterate through each camera, update weights
+        @ msmt: [{yj}_0, {yj}_1, ...{yj}_n]    n cameras
+        @ hypo: [bearing_0, bearing_1, ....bearing_n]   n_cameras
+        """
+
+        n_particles = hypo[0].shape[0]
+        weights = np.ones(n_particles)
+
+        for zi, hi in zip(msmt, hypo):
+            if zi[0] < 0: # got no measurements so weights are unchanged
+                wi = np.ones(n_particles)
+            else:
+                wi = squared_error(hi, zi, sigma=sigma)
+            weights *= wi
+        weights_sum = np.sum(weights)
+        if verbose:
+            # print(weights)
+            print(weights_sum)
+        # print(weights_sum)
+        return weights / weights_sum
+
+def resample(weights_):
+    n = len(weights_)
+    indices = np.random.choice(n, n, p=weights_)
+    return indices
+
+dt = 1/10
+A = np.block([
+    [np.eye(3), dt*np.eye(3)],
+    [np.zeros((3,3)), np.eye(3)]
+])
+A = np.block([
+    [A, np.zeros((6,1))],
+    [np.zeros((1,6)), 1]
+])
+
+def dynamics_d(x):
+    """
+    Discrete dynamics, last state is the target label
+    """
+    n, d = x.shape
+    w = np.zeros((d, n))
+    w[3:6] = np.random.normal(0, 0.2, (3,n))
+    x_1 = A @ x.T + w
+
+    return x_1.T

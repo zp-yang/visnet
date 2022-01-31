@@ -2,3 +2,5 @@ data/
 .vscode/
 .ipynb_checkpoints/
 __pycache__/
+videos/
+plots/

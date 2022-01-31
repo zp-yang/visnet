@@ -258,13 +258,13 @@ A = np.block([
     [np.zeros((1,6)), 1]
 ])
 
-def dynamics_d(x):
+def dynamics_d(x, sigma=0.2):
     """
     Discrete dynamics, last state is the target label
     """
     n, d = x.shape
     w = np.zeros((d, n))
-    w[3:6] = np.random.normal(0, 0.2, (3,n))
+    w[3:6] = np.random.normal(0, sigma, (3,n))
     x_1 = A @ x.T + w
 
     return x_1.T

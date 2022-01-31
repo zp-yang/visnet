@@ -1,6 +1,4 @@
 import numpy as np
-import camera
-import util
 
 class Track:
     """

@@ -234,11 +234,11 @@ class GzbVisTracker:
 
         label = np.array([-1,0,1])
 
-        # p_drone = np.array([0.1, 0.1, 0.8]) # 80% chance correctly identifying a drone
-        # p_bird = np.array([0.1, 0.8, 0.1]) # 80% chance correctly identifying a bird
-        p_drone = np.array([0,0,1])
-        p_bird = np.array([0,1,0])
-        
+        p_drone = np.array([0.2, 0.0, 0.8]) # 80% chance correctly identifying a drone
+        p_bird = np.array([0.2, 0.8, 0.0]) # 80% chance correctly identifying a bird
+        # p_drone = np.array([0,0,1])
+        # p_bird = np.array([0,1,0])
+
         # set labels according to target detection probability
         drone_labels = np.random.choice(label, n_drone, p=p_drone) 
         bird_labels = np.random.choice(label, n_bird, p=p_bird)

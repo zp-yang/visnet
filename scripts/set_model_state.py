@@ -105,12 +105,12 @@ def set_drone_state(*args):
 
 def main():
     rospy.init_node('set_pose')
-    x0_1 = np.array([-20, -5, 20])
-    x0_2 = np.array([20, 5, 20])
+    x0_1 = np.array([-20, -4, 20])
+    x0_2 = np.array([20, 4, 20])
 
     executor_args = [
         ["drone_0", target_traj_straight, x0_1, x0_1+[40,0,0], 60], 
-        # ["drone_1", target_traj_straight, x0_2, x0_2+[-40,0,0], 30],
+        ["drone_1", target_traj_straight, x0_2, x0_2+[-40,0,0], 30],
         # ["drone_0", target_traj_circle, [-10, 0, 18], [-10, 0, 18], 30],
         ["bird", target_traj_circle, [10,0,10], [10,0,10], 30],
     ]

@@ -1,0 +1,6 @@
+cv_camera:
+  device_id: 0
+  cv_cap_prop_fps: 30
+  # cv_cap_prop_fourcc: 1735420525 # mjgp
+  # cv_cap_prop_fourcc: 1196444237 # MJPG
+  

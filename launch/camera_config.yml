@@ -1,6 +1,11 @@
-cv_camera:
+camera_0:
+  camera_info_url: "file:///home/zpyang/git/visnet/src/visnet/camera_info/camera_0_1600_1200.yml"
   device_id: 0
   cv_cap_prop_fps: 30
   # cv_cap_prop_fourcc: 1735420525 # mjgp
   # cv_cap_prop_fourcc: 1196444237 # MJPG
-  
+  cv_cap_prop_gain: 64
+  cv_cap_prop_brightness: 30
+  cv_cap_prop_hue: 0
+  cv_cap_prop_auto_exposure: 3 # 1-manual 3-aperture priority
+  # cv_cap_prop_exposure: 9000

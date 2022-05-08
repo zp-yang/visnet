@@ -1,4 +1,3 @@
-from numpy.core.arrayprint import printoptions
 import util
 import numpy as np
 class Camera:

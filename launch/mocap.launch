@@ -1,0 +1,13 @@
+<!-- launch this node on one machine to broadcast pose to all cameras -->
+<launch>
+    <!-- arguments for qualisys node -->
+    <arg name="server" default="192.168.123.202"/>
+    <arg name="rate_limit" default="10"/>
+
+    <!-- <node pkg="visnet" name="$(arg cam_name)/qualisys_node" type="qualisys_node.py" output="screen"/> -->
+    <node pkg="qualisys" name="qualisys" type="node" output="screen">
+        <param name="server" value="$(arg server)"/>
+        <param name="rate_limit" value="$(arg rate_limit"/>
+    </node>
+    <node pkg="tf2_ros" type="static_transform_publisher" name="qualisys_map" args="0 0 0 0 0 0 map qualisys"/>
+</launch>

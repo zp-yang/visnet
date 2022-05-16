@@ -81,7 +81,11 @@ class CamNode():
         self.device_id = rospy.get_param("~device_id")
         self.width = rospy.get_param("~image_width")
         self.height = rospy.get_param("~image_height")
-        self.url = rospy.get_param("~camera_info_url")
+        try:
+            self.url = rospy.get_param("~camera_info_url")
+        except Exception as e:
+            rospy.logwarn(e)
+            rospy.logwarn("cannot find camera calibration information, using default...")
 
 
     def load_cv_cap_params(self):

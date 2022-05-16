@@ -1,5 +1,5 @@
 camera_0:
-  camera_info_url: "file:///home/zpyang/git/visnet/src/visnet/camera_info/camera_0_1600_1200.yml"
+  camera_info_url: "file:///home/zpyang/git/visnet/src/visnet/camera_info/camera_0.yaml"
   device_id: 0
   cv_cap_prop_fps: 30
   # cv_cap_prop_fourcc: 1735420525 # mjgp

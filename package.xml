@@ -59,6 +59,8 @@
   <depend>rospy</depend>
   <depend>std_msgs</depend>
   <depend>camera_info_manager_py</depend>
+  <depend>qualisys</depend>
+  <depend>tf2_ros</depend>
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

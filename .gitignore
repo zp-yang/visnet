@@ -6,3 +6,4 @@ videos/
 plots/
 build/
 
+*.tar.gz

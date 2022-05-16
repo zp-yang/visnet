@@ -1,12 +1,13 @@
 <launch>
   <rosparam command="load" file="$(find visnet)/launch/camera_config.yml"/>
 
+  <!-- arguments for camera node -->
   <arg name="device_id" default="0" />
   <arg name="image_width" default="1600" />
   <arg name="image_height" default="1200" />
   <arg name="pub_rate" default="30.0"/>
-
   <arg name="cam_name" default="camera"/>
+
   <param name="cam_name" value="$(arg cam_name)"/>
 
   <node pkg="visnet" name="$(arg cam_name)" type="camera_node.py" output="screen">
@@ -16,6 +17,9 @@
     <param name="pub_rate" value="$(arg pub_rate)"/>
   </node>
 
+  <node pkg="tf2_ros" type="static_transform_publisher" name="camera_map" args="0 0 0 0 0 0 map $(arg cam_name)"/>
+
+  
   <arg name="record" default="0"/>
   <node pkg="rosbag" name="rosbag_record_cam" type="record" 
     args="-o $(find visnet)/data/$(arg cam_name) /$(arg cam_name)/image_raw" if="$(arg record)"/>

@@ -1,28 +1,28 @@
 <launch>
-  <rosparam command="load" file="$(find visnet)/launch/camera_config.yml"/>
+	<rosparam command="load" file="$(find visnet)/launch/camera_config.yml"/>
 
-  <!-- arguments for camera node -->
-  <arg name="device_id" default="0" />
-  <arg name="image_width" default="1600" />
-  <arg name="image_height" default="1200" />
-  <arg name="pub_rate" default="30.0"/>
-  <arg name="cam_name" default="camera"/>
+	<!-- arguments for camera node -->
+	<arg name="device_id" default="0" />
+	<arg name="image_width" default="1600" />
+	<arg name="image_height" default="1200" />
+	<arg name="pub_rate" default="30.0"/>
+	<arg name="cam_name" default="camera"/>
 
-  <param name="cam_name" value="$(arg cam_name)"/>
+	<param name="cam_name" value="$(arg cam_name)"/>
 
-  <node pkg="visnet" name="$(arg cam_name)" type="camera_node.py" output="screen">
-    <param name="device_id" value="$(arg device_id)" />
-    <param name="image_width" value="$(arg image_width)" />
-    <param name="image_height" value="$(arg image_height)" />
-    <param name="pub_rate" value="$(arg pub_rate)"/>
-  </node>
+	<node pkg="visnet" name="$(arg cam_name)" type="camera_node.py" output="screen">
+		<param name="device_id" value="$(arg device_id)" />
+		<param name="image_width" value="$(arg image_width)" />
+		<param name="image_height" value="$(arg image_height)" />
+		<param name="pub_rate" value="$(arg pub_rate)"/>
+	</node>
 
-  <node pkg="tf2_ros" type="static_transform_publisher" name="camera_map" args="0 0 0 0 0 0 map $(arg cam_name)"/>
-  <node pkg="image_transport" type="republish" name="$(arg cam_name)_compressed_image_repub" 
-    args="raw in:=/$(arg cam_name)/image_raw compressed out:=/$(arg cam_name)/image_raw/compressed"/>
-  
-  <arg name="record" default="0"/>
-  <node pkg="rosbag" name="rosbag_record_cam" type="record" 
-    args="-o $(find visnet)/data/$(arg cam_name) /$(arg cam_name)/image_raw" if="$(arg record)"/>
-  <node type="rviz" name="rviz" pkg="rviz" args="-d $(find visnet)/config/camera_node.rviz" />
+	<!-- <node pkg="tf2_ros" type="static_transform_publisher" name="camera_map" args="0 0 0 0 0 0 map $(arg cam_name)"/> -->
+	<node pkg="image_transport" type="republish" name="$(arg cam_name)_compressed_image_repub" 
+		args="raw in:=/$(arg cam_name)/image_raw compressed out:=/$(arg cam_name)/image_raw/compressed"/>
+	
+	<arg name="record" default="0"/>
+	<node pkg="rosbag" name="rosbag_record_cam" type="record" 
+		args="-o $(find visnet)/data/$(arg cam_name) /$(arg cam_name)/image_raw/compressed/compressed" if="$(arg record)"/>
+	<!-- <node type="rviz" name="rviz" pkg="rviz" args="-d $(find visnet)/config/camera_node.rviz" /> -->
 </launch>

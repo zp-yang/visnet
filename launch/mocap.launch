@@ -10,4 +10,9 @@
         <param name="rate_limit" value="$(arg rate_limit"/>
     </node>
     <node pkg="tf2_ros" type="static_transform_publisher" name="qualisys_map" args="0 0 0 0 0 0 map qualisys"/>
+    <arg name="record" default="0"/>
+    <node pkg="rosbag" name="rosbag_record_cam" type="record" 
+    	args="-o $(find visnet)/data/$(arg cam_name) -e /camera_(.*)/image_raw/compressed/compressed" if="$(arg record)"/>
+	
+	<node type="rviz" name="rviz" pkg="rviz" args="-d $(find visnet)/config/mocap.rviz" />
 </launch>

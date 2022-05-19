@@ -1,5 +1,5 @@
 <launch>
-	<rosparam command="load" file="$(find visnet)/launch/camera_config.yml"/>
+	<!-- <rosparam command="load" file="$(find visnet)/launch/camera_config.yml"/> -->
 
 	<!-- arguments for camera node -->
 	<arg name="device_id" default="0" />

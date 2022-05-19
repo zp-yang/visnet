@@ -1,5 +1,6 @@
 <!-- launch this node on one machine to broadcast pose to all cameras -->
 <launch>
+	<rosparam command="load" file="$(find visnet)/launch/camera_config.yml"/>
     <!-- arguments for qualisys node -->
     <arg name="server" default="192.168.123.202"/>
     <arg name="rate_limit" default="10"/>
@@ -12,7 +13,7 @@
     <node pkg="tf2_ros" type="static_transform_publisher" name="qualisys_map" args="0 0 0 0 0 0 map qualisys"/>
     <arg name="record" default="0"/>
     <node pkg="rosbag" name="rosbag_record_cam" type="record" 
-    	args="-o $(find visnet)/data/$(arg cam_name) -e /camera_(.*)/image_raw/compressed/compressed" if="$(arg record)"/>
-	
+    	args="-o $(find visnet)/data/mocap_live -e /qualisys/camera_(.*)/pose /camera_(.*)/image_raw/compressed/compressed /camera_(.*)/camera_info" if="$(arg record)"/>
+
 	<node type="rviz" name="rviz" pkg="rviz" args="-d $(find visnet)/config/mocap.rviz" />
 </launch>

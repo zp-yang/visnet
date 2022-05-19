@@ -18,7 +18,8 @@
   </node>
 
   <node pkg="tf2_ros" type="static_transform_publisher" name="camera_map" args="0 0 0 0 0 0 map $(arg cam_name)"/>
-
+  <node pkg="image_transport" type="republish" name="$(arg cam_name)_compressed_image_repub" 
+    args="raw in:=/$(arg cam_name)/image_raw compressed out:=/$(arg cam_name)/image_raw/compressed"/>
   
   <arg name="record" default="0"/>
   <node pkg="rosbag" name="rosbag_record_cam" type="record" 

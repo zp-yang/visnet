@@ -6,6 +6,8 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /TF1
+        - /TF1/Frames1
         - /camera_0_compressed1
         - /camera_1_compressed1
         - /camera_3_compressed1
@@ -29,7 +31,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: camera_0_compressed
+    SyncSource: ""
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -59,17 +61,19 @@ Visualization Manager:
       Enabled: true
       Frame Timeout: 15
       Frames:
-        All Enabled: true
+        All Enabled: false
         camera_0:
           Value: true
         camera_1:
           Value: true
         camera_3:
           Value: true
+        cf0:
+          Value: true
         map:
           Value: true
         qualisys:
-          Value: true
+          Value: false
       Marker Alpha: 1
       Marker Scale: 1
       Name: TF
@@ -84,6 +88,8 @@ Visualization Manager:
             camera_1:
               {}
             camera_3:
+              {}
+            cf0:
               {}
       Update Interval: 0
       Value: true
@@ -151,7 +157,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz/Orbit
-      Distance: 9.99983024597168
+      Distance: 3.04753041267395
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -167,9 +173,9 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.6153981685638428
+      Pitch: 0.8053976893424988
       Target Frame: <Fixed Frame>
-      Yaw: 6.208587169647217
+      Yaw: 4.600396156311035
     Saved: ~
 Window Geometry:
   Displays:

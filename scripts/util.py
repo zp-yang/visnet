@@ -1,5 +1,4 @@
 import numpy as np
-from numpy.core.numeric import indices
 
 # rotation correction between gazebo cam coordinates and literature convention
 R_model2cam = np.array([
@@ -50,36 +49,50 @@ def so3_wedge(w):
         [w[2], 0, -w[0]],
         [-w[1], w[0], 0]
     ])
-    return -wx
+    # NOTE: NOT standard convention but have to add "-" to match euler 321 sequence???
+    return wx
 
 def so3_vee(wx):
     w = np.array([wx[2,1], wx[0,2], wx[1,0]])
     return w
 
-eps = 1e-7    
+eps = 1e-7
 def so3_exp(w):
     theta = np.linalg.norm(w)
     C1 = 0
     C2 = 0
-    if theta > eps:
+    if np.abs(theta) > eps:
         C1 = np.sin(theta)/theta
         C2 = (1 - np.cos(theta))/theta**2
     else:
         C1 = 1 - theta**2/6 + theta**4/120 - theta**6/5040
         C2 = 1/2- theta**2/24 + theta**4/720 - theta**5/40320
     wx = so3_wedge(w)
-    return np.eye(3)  + C1 * wx + C2 * wx @ wx
+    R = np.eye(3) + C1 * wx + C2 * wx @ wx
+    # NOTE: WHY DOES R need a negative sign to match euler321 to DCM ????
+    # return R
+    return -R
 
 def so3_log(R):
     theta = np.arccos((np.linalg.trace(R) - 1) / 2)
+    C3 = 0
+    if np.abs(theta) > eps:
+        C3 = theta/(2*np.sin(theta))
+    else:
+        C3 = 0.5 + theta**2/12 + 7*theta**4/720
     return so3_vee(C3(theta) * (R - R.T))
 
 def get_cam_in(cam_param):
+    # fx = cam_param[0]
+    # fy = cam_param[1]
+    # cx = cam_param[2]
+    # cy = cam_param[3]
+    # s = cam_param[4]
     fx = cam_param[0]
-    fy = cam_param[1]
+    fy = cam_param[4]
     cx = cam_param[2]
-    cy = cam_param[3]
-    s = cam_param[4]
+    cy = cam_param[5]
+    s = cam_param[1]
     cam_in = np.array([
         [fx, s, cx],
         [0, fy, cy],

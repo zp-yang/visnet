@@ -11,7 +11,7 @@ class Camera:
         # this rotation is kinda goofy but corrects the gazebo convention and literature convention
         self.R = util.R_model2cam @ self.R_cam 
         
-        self.P = util.get_cam_mat_lie(self.param, self.pos, self.att)
+        self.P = util.get_cam_mat_euler(self.param, self.pos, self.att)
         self.range = 25 # meters
         self.fov = np.deg2rad(90) #degrees, both directions
         self.bound = 2000

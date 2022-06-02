@@ -1,5 +1,6 @@
 <launch>
-    <node name="rosbag_plau" pkg="rosbag" type="play" args="-s 15 $(find visnet)/data/mocap_live_all_2022-05-19-19-59-27.bag -l"/>
+    <!-- "-s" starts play at 15 seconds mark, "-l" loops the bag -->
+    <node name="rosbag_play" pkg="rosbag" type="play" args="-s 15 $(find visnet)/data/mocap_live_all_2022-05-19-19-59-27.bag -l"/>
     <node pkg="tf2_ros" type="static_transform_publisher" name="qualisys_map" args="0 0 0 0 0 0 map qualisys"/>
     <node type="rviz" name="rviz" pkg="rviz" args="-d $(find visnet)/config/bag.rviz" />
 </launch>

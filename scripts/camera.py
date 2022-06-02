@@ -91,12 +91,15 @@ class CamNode(Camera):
         return msmts.T
 
 class CamGroup():
-    def __init__(self, cam_param, cam_poses):
+    def __init__(self, cam_params, cam_poses):
         self.n_cams = cam_poses.shape[0]
-        self.cam_param = cam_param
+        self.cam_params = cam_params
         self.cam_poses = cam_poses
-        self.cam_nodes = [CamNode(cam_param, poses[0:3], poses[3:6]) for poses in cam_poses]
-        
+        # self.cam_nodes = [CamNode(cam_param, poses[0:3], poses[3:6]) for poses in cam_poses]
+        self.cam_nodes = []
+        for i in range(self.n_cams):
+            self.cam_nodes.append(CamNode(self.cam_params[i], self.cam_poses[i, 0:3], self.cam_poses[i, 3:6]))
+
     def get_group_measurement(self, targets, labels):
         z = []
         for node in self.cam_nodes:

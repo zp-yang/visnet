@@ -69,7 +69,7 @@ def so3_exp(w):
         C2 = 1/2- theta**2/24 + theta**4/720 - theta**5/40320
     wx = so3_wedge(w)
     R = np.eye(3) + C1 * wx + C2 * wx @ wx
-    # NOTE: WHY DOES R need a negative sign to match euler321 to DCM ????
+    # NOTE: WHY DOES R need a negative sign to match DCM converted from Euler 321????
     # return R
     return -R
 
@@ -281,3 +281,29 @@ def dynamics_d(x, sigma=0.2):
     x_1 = A @ x.T + w
 
     return x_1.T
+
+def get_iou(bb1, bb2):
+    # bounding box format (top-left | bottom-right) (x1, y1, x2, y2)
+    # determine the coordinates of the intersection rectangle
+    x_left = max(bb1[0], bb2[0])
+    y_top = max(bb1[1], bb2[1])
+    x_right = min(bb1[2], bb2[2])
+    y_bottom = min(bb1[3], bb2[3])
+
+    if x_right < x_left or y_bottom < y_top:
+        return 0.0
+
+    # The intersection of two axis-aligned bounding boxes is always an
+    # axis-aligned bounding box
+    intersection_area = (x_right - x_left + 1) * (y_bottom - y_top + 1)
+
+    # compute the area of both AABBs
+    bb1_area = (bb1[2] - bb1[0] + 1) * (bb1[3] - bb1[1] + 1)
+    bb2_area = (bb2[2] - bb2[0] + 1) * (bb2[3] - bb2[1] + 1)
+
+    # compute the intersection over union by taking the intersection
+    # area and dividing it by the sum of prediction + ground-truth
+    # areas - the interesection area
+    iou = intersection_area / float(bb1_area + bb2_area - intersection_area)
+
+    return iou

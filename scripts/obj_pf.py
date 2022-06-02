@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import numpy as np
-
+import cv2
 import roslib
 import tf2_py
 roslib.load_manifest('visnet')
@@ -14,48 +14,72 @@ from nav_msgs.msg import Path
 from geometry_msgs.msg import PoseStamped, Point32
 from sensor_msgs.msg import PointCloud, ChannelFloat32
 
+import os
+data_dir = os.path.abspath( os.path.join(os.path.dirname(__file__), os.pardir)) + "/data/" 
+info_dir = os.path.abspath( os.path.join(os.path.dirname(__file__), os.pardir)) + "/camera_info/"
+import json
+import yaml
+
 # these are modules custom made for this package
 import util
 import camera
 from track import Track
 
+cam_names = [
+    "camera_0",
+    "camera_1",
+    # "camera_2",
+    "camera_3",
+    ]
 
-class GzbPF():
+# load calibration and camera poses
+calib_data = {}
+with open(f"{data_dir}/calibration/calib_data.json", "r") as fs:
+    calib_data = json.load(fs)
+cam_poses_dict = calib_data["pose"]
+
+cam_poses = np.array([val for val in cam_poses_dict.values()])
+
+cam_params = []
+for i, cam_name in enumerate(cam_names):
+    cam_info = {}
+    with open(f"{info_dir}/{cam_name}.yaml", 'r') as fs: 
+        cam_info = yaml.safe_load(fs)
+    cam_pinhole_K = np.array(cam_info["camera_matrix"]["data"])
+    cam_dist = np.array(cam_info["distortion_coefficients"]["data"])
+    cam_K, dist_valid_roi = cv2.getOptimalNewCameraMatrix(np.array(cam_pinhole_K).reshape(3,3), np.array(cam_dist), (1600,1200), 1, (1600, 1200))
+    cam_params.append(cam_K.reshape(-1))
+
+
+class Tracker3D():
     """
-    A particle filter for Gazebo vision tracking
+    Localize target location in 3D using particle filter
     """
-    
-    def __init__(self, n_cam=4):
-        # [fx, fy, cx, cy, s] -- (should probably try to get these from gazebo instead, how to handle the update?)
-        cam_param = [642.0926159343306, 642.0926159343306, 1000.5, 1000.5, 0]
-        cam_poses = np.array([
-            [20, 20, 12, 0, 0, -2.2],
-            [20, -15, 12, 0, 0, 2.2],
-            [-20, -20, 12, 0, 0, 0.7],
-            [-20, 20, 12, 0, 0, -0.7],
-        ])
-        
-        self.cam_group = camera.CamGroup(cam_param, cam_poses)
+    def __init__(self, cam_names) -> None:
+        self.n_cam = len(cam_names)
+        self.cam_group = camera.CamGroup(cam_params, cam_poses)
+        # for node in self.cam_group.cam_nodes:
+        #     print(node)
         self.tracks = []
         self.cam_nodes = []
         self.msmt_subs = []
         self.paths = [[],[]]
         self.path_buffer_len = 200
 
-        x0_1 = np.array([-20, -4, 20])
-        x0_2 = np.array([20, 4, 20])
-        
+        # x0_1 = np.array([-20, -4, 20])
+        pose_msg: PoseStamped = rospy.wait_for_message("qualisys/cf0/pose", PoseStamped)
+        x0_1 = np.array([pose_msg.pose.position.x, pose_msg.pose.position.y, pose_msg.pose.position.z])
+
         n_particles = 5000
 
         track1 = Track(n_particles=n_particles, x0=x0_1, label=1)
-        track2 = Track(n_particles=n_particles, x0=x0_2, label=1)
+        # track2 = Track(n_particles=n_particles, x0=x0_2, label=1)
         
         self.tracks.append(track1)
-        self.tracks.append(track2)
+        # self.tracks.append(track2)
 
-        for i in range(n_cam):
-            camera_name = "camera_"+str(i)
-            msmt_sub = mf.Subscriber(camera_name+"_msmt", CamMsmt)
+        for cam_name in cam_names:
+            msmt_sub = mf.Subscriber(f"{cam_name}/msmt", CamMsmt)
             self.msmt_subs.append(msmt_sub)
             
         ts = mf.TimeSynchronizer(self.msmt_subs, queue_size=10)
@@ -64,11 +88,11 @@ class GzbPF():
         self.br = tf2_ros.TransformBroadcaster()
         path_pub_0 = rospy.Publisher("/drone_0/path", Path, queue_size=10)
         cloud_pub_0 = rospy.Publisher("/drone_0/cloud", PointCloud, queue_size=10)
-        path_pub_1 = rospy.Publisher("/drone_1/path", Path, queue_size=10)
-        cloud_pub_1 = rospy.Publisher("/drone_1/cloud", PointCloud, queue_size=10)
+        # path_pub_1 = rospy.Publisher("/drone_1/path", Path, queue_size=10)
+        # cloud_pub_1 = rospy.Publisher("/drone_1/cloud", PointCloud, queue_size=10)
 
-        self.path_pubs = [path_pub_0, path_pub_1]
-        self.cloud_pubs = [cloud_pub_0, cloud_pub_1]
+        self.path_pubs = [path_pub_0]
+        self.cloud_pubs = [cloud_pub_0]
 
     # This is where we process particle fiters
     def synced_callback(self, *args):
@@ -102,7 +126,7 @@ class GzbPF():
             z.append(track_msmts)
         
         mean_states = np.array([track.mean_state[0:3] for track in self.tracks])
-        mean_hypo = self.cam_group.get_group_measurement(mean_states, labels=np.array([1,1]))
+        mean_hypo = self.cam_group.get_group_measurement(mean_states, labels=np.array([1]))
 
         z_a = []
         for z_m, mean_hypo_m in zip(z, mean_hypo):
@@ -117,6 +141,7 @@ class GzbPF():
             particles = util.dynamics_d(track.particles)
             hypo = util.observe_fn(self.cam_group, track.particles)
             weights = util.weight_fn(msmt=msmt, hypo=hypo, sigma=40)
+            weights = np.nan_to_num(weights, copy=False, nan=0)
             weights = np.clip(weights, 0, 1)
             track.update(weights, particles)
 
@@ -169,17 +194,15 @@ class GzbPF():
             cloud.points = points
             cloud.channels = [channel]
             self.cloud_pubs[i].publish(cloud)
-    
-def main():
-    rospy.init_node('particle_filter')
-    gzb_pf = GzbPF(n_cam=4)
 
-    
+def main():
+    rospy.init_node("tracker_3d")
+    tracker3d = Tracker3D(cam_names)
 
     try:
         rospy.spin()
-    except KeyboardInterrupt:
-        print("Shuttin down...")
+    except Exception as e:
+        print(e)
 
 if __name__=="__main__":
     main()

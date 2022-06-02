@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import numpy as np
 import cv2
 import util
@@ -10,7 +11,6 @@ from visnet.msg import CamMsmt
 import os
 data_dir = os.path.abspath( os.path.join(os.path.dirname(__file__), os.pardir)) + "/data/" 
 info_dir = os.path.abspath( os.path.join(os.path.dirname(__file__), os.pardir)) + "/camera_info/"
-import json
 import yaml
 
 cam_names = [
@@ -21,13 +21,6 @@ cam_names = [
     ]
 
 # load calibration and camera poses
-# calib_data = {}
-# with open(f"{data_dir}/calibration/calib_data.json", "r") as fs:
-#     calib_data = json.load(fs)
-# cam_poses_dict = calib_data["pose"]
-
-# cam_poses = np.array([val for val in cam_poses_dict.values()])
-
 cam_pinhole_Ks = {}
 cam_Ps = {}
 cam_dists = {}
@@ -376,9 +369,17 @@ if __name__=="__main__":
     parser.add_argument(
         "mode",
         default="single",
-        help="subscribe to a single camera or multiple cameras")
+        help="subscribe to a single camera or multiple cameras"
+    )
     
-    parser.add_argument("--cam", help="camera name (str)")
+    parser.add_argument(
+        "cam",
+        default="camera",
+        help="camera name (str)"
+    )
+    parser.add_argument("__name")
+    parser.add_argument("__log")
+
     try:
         args = parser.parse_args()
         main(args)

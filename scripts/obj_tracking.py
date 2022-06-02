@@ -258,8 +258,11 @@ def img_cb(data, args):
     img_pub: rospy.Publisher = args[4]
     cam_name = args[5]
 
-    cv_img = bridge.compressed_imgmsg_to_cv2(data, "bgr8")
-
+    if data._type == "sensor_msgs/CompressedImage":
+        cv_img = bridge.compressed_imgmsg_to_cv2(data, "bgr8")
+    elif data._type == "sensor_msgs/Image":
+        cv_img = bridge.imgmsg_to_cv2(data, "bgr8")
+    
     motion_bbox, img = motion_det.detect(cv_img)
     meta, pred_res = predictor.inference(cv_img)
     pred_img = overlay_bbox_cv(cv_img.copy(), pred_res[0], cfg.class_names, score_thresh=0.35)
@@ -269,7 +272,6 @@ def img_cb(data, args):
     pred_bbox = predictor.extract_bbox(pred_res[0], cfg.class_names, score_thresh=0.35)
     pred_bbox = np.array(pred_bbox, dtype=np.int16)
     motion_bbox = np.array(motion_bbox, dtype=np.int16)
-
     
     if pred_bbox.shape[0]:
         pred_bbox = pred_bbox[:, 0:-1] # don't send prediction score
@@ -333,34 +335,53 @@ def undistort(bboxes, cam_name):
     # print(f"{undistort_points.shape} | {bboxes[:,2:4].shape}")
     return np.hstack([undistort_points, bboxes[:,2:4]]).astype(np.int16)
 
-def main():
+def main(args):
     rospy.init_node("motion_detection")
-    cam_names = [
-    "camera_0",
-    "camera_1",
-    # "camera_2",
-    "camera_3",
-    ]
+    if args.mode == "single":
+        cam_names = [args.cam]
+    elif args.mode == "multi":
+        cam_names = [
+        "camera_0",
+        "camera_1",
+        # "camera_2",
+        "camera_3",
+        ]
+    else:
+        rospy.logerr("Invalid mode, must be (single) or (multi)!")
+        return
+
     bridge = CvBridge()
     logger = Logger(-1, use_tensorboard=False)
 
     predictor = Predictor(cfg, model_path, logger, device=device)
-    for i, cam_name in enumerate(cam_names):
+    for cam_name in cam_names:
         print(f"setting up tracker for {cam_name}")
 
         motion_det = MotionDetector("MOG2", "KCF", view=True)
 
-        msmt_pub_ = rospy.Publisher(f"{cam_names[i]}/msmt", CamMsmt, queue_size=2)
-        img_pub_ = rospy.Publisher(f"{cam_names[i]}/tracked_view", Image, queue_size=1)
+        msmt_pub_ = rospy.Publisher(f"{cam_name}/msmt", CamMsmt, queue_size=2)
+        img_pub_ = rospy.Publisher(f"{cam_name}/tracked_view", Image, queue_size=1)
 
         img_cb_args = [bridge, motion_det, predictor, msmt_pub_, img_pub_, cam_name]
-        img_sub_ = rospy.Subscriber(f"{cam_names[i]}/image_raw/compressed/compressed", CompressedImage, img_cb, img_cb_args)
-    
+        if args.mode == "single":
+            img_sub_ = rospy.Subscriber(f"{cam_name}/image_raw", Image, img_cb, img_cb_args)
+        elif args.mode == "multi":
+            img_sub_ = rospy.Subscriber(f"{cam_name}/image_raw/compressed/compressed", CompressedImage, img_cb, img_cb_args)
+
     rospy.spin()
 
 if __name__=="__main__":
+    import argparse
+    parser = argparse.ArgumentParser("2D motion tracking/inference")
+    parser.add_argument(
+        "mode",
+        default="single",
+        help="subscribe to a single camera or multiple cameras")
+    
+    parser.add_argument("--cam", help="camera name (str)")
     try:
-        main()
+        args = parser.parse_args()
+        main(args)
 
     except Exception as e:
         print(e)

@@ -57,23 +57,44 @@ def get_cam_pixel_pos():
     print(cam_rois)
     return cam_rois
 
-def save_cam_view():
+def save_cam_view(save_dir):
     for cam in cam_names:
         img_msg = rospy.wait_for_message(f"{cam}/image_raw/compressed/compressed", CompressedImage)
         bridge = CvBridge()
         cv_img = bridge.compressed_imgmsg_to_cv2(img_msg, "bgr8")
-        cv2.imwrite(f"{data_dir}/calibration/{cam}_view.jpg", cv_img)
+        cv2.imwrite(f"{save_dir}/{cam}_view.jpg", cv_img)
 
-def main():
+def main(args):
     import json
-    fcalib_data = f"{data_dir}/calibration/calib_data.json"
+    from datetime import date, datetime
+    import os, errno
     cam_poses = get_cam_world_pos()
     cam_rois = get_cam_pixel_pos()
-    with open(fcalib_data, "w") as fs:
-        data = {"pose": cam_poses, "roi": cam_rois}
-        json.dump(data, fs)
-
+    
+    try:
+        date_str = f"{date.today().strftime('%Y-%m-%d')}-{datetime.now().time().strftime('%I%M%S')}"
+        calib_dir = f"{data_dir}/calibration-{date_str}/"
+        os.makedirs(calib_dir)
+        fcalib_data = f"{data_dir}/calibration-{date_str}/calib_data.json"
+    
+        with open(fcalib_data, "w") as fs:
+            data = {"pose": cam_poses, "roi": cam_rois}
+            json.dump(data, fs)
+        
+        if args.save_img:
+            save_cam_view(calib_dir)
+    except OSError as e:
+        print(e)
+        if e.errno != errno.EEXIST:
+            raise
+        else:
+            print("could not create directory, it already exists")
 if __name__=="__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("save_img", type=bool)
+    args = parser.parse_args()
     rospy.init_node("extrinsic_calibration")
-    main()
+
+    main(args)
     # save_cam_view()

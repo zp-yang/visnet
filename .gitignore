@@ -7,3 +7,5 @@ plots/
 build/
 
 *.tar.gz
+
+launch/remote_bag_record.launch

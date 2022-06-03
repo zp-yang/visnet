@@ -4,11 +4,11 @@ camera_0:
   cv_cap_prop_fps: 30
   # cv_cap_prop_fourcc: 1735420525 # mjgp
   # cv_cap_prop_fourcc: 1196444237 # MJPG
-  cv_cap_prop_gain: 64
+  cv_cap_prop_gain: 20
   cv_cap_prop_brightness: 30
   cv_cap_prop_hue: 0
   cv_cap_prop_auto_exposure: 3 # 1-manual 3-aperture priority
-  # cv_cap_prop_exposure: 9000
+  cv_cap_prop_exposure: 1000
 
 camera_1:
   camera_info_url: "file:///home/visnet/catkin/src/visnet/camera_info/camera_1.yaml"
@@ -16,11 +16,11 @@ camera_1:
   cv_cap_prop_fps: 30
   # cv_cap_prop_fourcc: 1735420525 # mjgp
   # cv_cap_prop_fourcc: 1196444237 # MJPG
-  cv_cap_prop_gain: 64
+  cv_cap_prop_gain: 20
   cv_cap_prop_brightness: 30
   cv_cap_prop_hue: 0
   cv_cap_prop_auto_exposure: 3 # 1-manual 3-aperture priority
-  # cv_cap_prop_exposure: 9000
+  cv_cap_prop_exposure: 1000
 
 camera_2:
   camera_info_url: "file:///home/visnet/catkin/src/visnet/camera_info/camera_2.yaml"
@@ -32,7 +32,7 @@ camera_2:
   cv_cap_prop_brightness: 30
   cv_cap_prop_hue: 0
   cv_cap_prop_auto_exposure: 3 # 1-manual 3-aperture priority
-  # cv_cap_prop_exposure: 9000
+  # cv_cap_prop_exposure: 1000
 
 camera_3:
   camera_info_url: "file:///home/zpyang/git/visnet/src/visnet/camera_info/camera_3.yaml"
@@ -40,8 +40,8 @@ camera_3:
   cv_cap_prop_fps: 30
   # cv_cap_prop_fourcc: 1735420525 # mjgp
   # cv_cap_prop_fourcc: 1196444237 # MJPG
-  cv_cap_prop_gain: 64
+  cv_cap_prop_gain: 20
   cv_cap_prop_brightness: 30
   cv_cap_prop_hue: 0
   cv_cap_prop_auto_exposure: 3 # 1-manual 3-aperture priority
-  # cv_cap_prop_exposure: 9000
+  cv_cap_prop_exposure: 1000 # only outputs 10hz in manual at 1000

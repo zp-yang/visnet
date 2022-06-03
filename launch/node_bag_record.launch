@@ -1,0 +1,13 @@
+<launch>
+    <arg name="master" default="0"/>
+    <arg name="cam_name" default="camera"/>
+
+    <!-- running as the master node, record pose and images -->
+    <node pkg="rosbag" name="rosbag_record_cam" type="record" 
+    	args="-o /home/zpyang/rosbags/bag_master -e /qualisys/(.*)/pose /camera_3/image_raw/compressed/compressed" if="$(eval arg('master') == 1)"/>
+
+    <!-- running as the child node, record only images -->
+    <node pkg="rosbag" name="rosbag_record_cam" type="record" 
+    	args="-o /home/visnet/rosbags/bag_child /$(arg cam_name)/image_raw/compressed/compressed " if="$(eval arg('master') == 0)"/>
+
+</launch>

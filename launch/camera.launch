@@ -17,7 +17,9 @@
 		<param name="pub_rate" value="$(arg pub_rate)"/>
 	</node>
 
-	<node pkg="visnet" type="obj_tracking.py" name="$(arg cam_name)_2d_tracking" output="screen" args="single $(arg cam_name)"/>
+	<arg name="track" default="0"/>
+	<node pkg="visnet" type="obj_tracking.py" name="$(arg cam_name)_2d_tracking" output="screen" 
+		args="single $(arg cam_name)" if="$(arg track)"/>
 	
 	<node pkg="image_transport" type="republish" name="$(arg cam_name)_compressed_image_repub" 
 		args="raw in:=/$(arg cam_name)/image_raw compressed out:=/$(arg cam_name)/image_raw/compressed"/>

@@ -23,17 +23,35 @@ cam_names = [
     "camera_3",
     ]
 
+def get_opt_quat(Q):
+    # Q: 4xM
+    print(Q.shape)
+    A = np.zeros((4,4))
+    M = Q.shape[0]
+    for i in range(M):
+        q = Q[i,:].reshape(4,1)
+        if q[0] < 0:
+            q = -q
+        A = q @ q.T + A
+    A = A / M
+    e, v = np.linalg.eig(A)
+    q_avg = v[:,np.argmax(e)]
+    return q_avg.ravel()
+
 def get_cam_world_pos():
     cam_poses = {}
     # get the first 10 pose msgs from qualisys and average them to store as camera's position
     for cam in cam_names:
         pos_list = []
+        quat_list = [] # w x y z
         print(f"getting position of {cam}...")
         for i in range(10):
             msg_: PoseStamped = rospy.wait_for_message(f"/qualisys/{cam}/pose", PoseStamped)
             pos_list.append([msg_.pose.position.x, msg_.pose.position.y, msg_.pose.position.z])
-        
-        cam_poses[cam] = np.hstack([np.mean(pos_list, axis=0), np.zeros(3)]).tolist()
+            quat_list.append([msg_.pose.orientation.w, msg_.pose.orientation.x, msg_.pose.orientation.y, msg_.pose.orientation.z,])
+        q_avg = get_opt_quat(np.array(quat_list))
+        cam_poses[cam] = np.hstack([np.mean(pos_list, axis=0), q_avg]).tolist()
+
     print(cam_poses)
 
     return cam_poses
@@ -69,7 +87,8 @@ def main(args):
     from datetime import date, datetime
     import os, errno
     cam_poses = get_cam_world_pos()
-    cam_rois = get_cam_pixel_pos()
+    if not args.pose_only:
+        cam_rois = get_cam_pixel_pos()
     
     try:
         date_str = f"{date.today().strftime('%Y-%m-%d')}-{datetime.now().time().strftime('%I%M%S')}"
@@ -78,8 +97,11 @@ def main(args):
         fcalib_data = f"{data_dir}/calibration-{date_str}/calib_data.json"
     
         with open(fcalib_data, "w") as fs:
-            data = {"pose": cam_poses, "roi": cam_rois}
-            json.dump(data, fs)
+            if args.pose_only:
+                json.dump(cam_poses, fs)
+            else:
+                data = {"pose": cam_poses, "roi": cam_rois}
+                json.dump(data, fs)
         
         if args.save_img:
             save_cam_view(calib_dir)
@@ -93,6 +115,7 @@ if __name__=="__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument("save_img", type=bool)
+    parser.add_argument("--pose_only", type=bool)
     args = parser.parse_args()
     rospy.init_node("extrinsic_calibration")
 

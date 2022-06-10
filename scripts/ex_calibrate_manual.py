@@ -10,7 +10,7 @@ import cv2
 import util
 
 calib_data = None
-with open(f"{data_dir}/calibration/calib_data.json", 'r') as fs:
+with open(f"{data_dir}/calibration_circle/calib_data.json", 'r') as fs:
     calib_data = json.load(fs)
 cam_poses = calib_data["pose"]
 cam_rois = calib_data["roi"]
@@ -61,13 +61,13 @@ if __name__=="__main__":
     obj_pos_1 = np.array(cam_poses[other_cam_names[0]][0:3])
     obj_pos_2 = np.array(cam_poses[other_cam_names[1]][0:3])
 
-    orig_img = cv2.imread(f"{data_dir}/calibration/{cam_name}_view.jpg")
+    orig_img = cv2.imread(f"{data_dir}/calibration_circle/{cam_name}_view.jpg")
     orig_img = cv2.rectangle(orig_img, rois[0,0:2], (rois[0,0:2] + rois[0,2:4]), (255,0,0), 2)
     orig_img = cv2.rectangle(orig_img, rois[1,0:2], (rois[1,0:2] + rois[1,2:4]), (0,255,0), 2)
 
     cam_att = np.zeros(3)
     cam_pos = np.array(cam_poses[cam_name][0:3])
-    cam_P, dist_valid_roi = cv2.getOptimalNewCameraMatrix(cam_pinhole_K.reshape(3,3), cam_dist, (1600,1200), 0.5, (1600, 1200))
+    cam_P, dist_valid_roi = cv2.getOptimalNewCameraMatrix(cam_pinhole_K.reshape(3,3), cam_dist, (1600,1200), 1, (1600, 1200))
 
     slider_scale = 10000
     undistort_img = cv2.undistort(orig_img, cam_pinhole_K.reshape(3,3), cam_dist, None, newCameraMatrix=cam_P)

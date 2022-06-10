@@ -2,10 +2,19 @@ import numpy as np
 
 # rotation correction between gazebo cam coordinates and literature convention
 R_model2cam = np.array([
-        [0, 1, 0],
-        [0, 0, 1],
-        [-1, 0, 0],        
-    ])
+    [0, 1, 0],
+    [0, 0, 1],
+    [1, 0, 0],        
+])
+
+# SE2, transform image coordiantes to match the book
+SE2_pix2image = np.array([
+    [-1, 0,  1600],
+    [0, -1, 1200],
+    [0, 0,  1],
+])
+
+inv_SE2 = SE2_pix2image
 
 # 321 Euler sequence
 def euler2dcm(euler):
@@ -32,6 +41,16 @@ def euler2dcm(euler):
     dcm = R1 @ R2 @ R3
     return dcm
 
+def mrp2dcm(r):
+        assert r.shape == (4, 1) or r.shape == (4,)
+        a = r[:3]
+        X = so3_wedge(a)
+        n_sq = np.dot(a, a)
+        X_sq = X @ X
+        R = np.eye(3) + (8 * X_sq - 4 * (1 - n_sq) * X) / (1 + n_sq) ** 2
+        # return transpose, due to convention difference in book
+        return R.T
+
 def cart2hom(points):
     """
     points shape should be (3, n)
@@ -49,7 +68,6 @@ def so3_wedge(w):
         [w[2], 0, -w[0]],
         [-w[1], w[0], 0]
     ])
-    # NOTE: NOT standard convention but have to add "-" to match euler 321 sequence???
     return wx
 
 def so3_vee(wx):
@@ -69,25 +87,18 @@ def so3_exp(w):
         C2 = 1/2- theta**2/24 + theta**4/720 - theta**5/40320
     wx = so3_wedge(w)
     R = np.eye(3) + C1 * wx + C2 * wx @ wx
-    # NOTE: WHY DOES R need a negative sign to match DCM converted from Euler 321????
-    # return R
-    return -R
+    return R
 
 def so3_log(R):
-    theta = np.arccos((np.linalg.trace(R) - 1) / 2)
+    theta = np.arccos((np.trace(R) - 1) / 2)
     C3 = 0
     if np.abs(theta) > eps:
         C3 = theta/(2*np.sin(theta))
     else:
         C3 = 0.5 + theta**2/12 + 7*theta**4/720
-    return so3_vee(C3(theta) * (R - R.T))
+    return so3_vee(C3 * (R - R.T))
 
 def get_cam_in(cam_param):
-    # fx = cam_param[0]
-    # fy = cam_param[1]
-    # cx = cam_param[2]
-    # cy = cam_param[3]
-    # s = cam_param[4]
     fx = cam_param[0]
     fy = cam_param[4]
     cx = cam_param[2]
@@ -110,19 +121,47 @@ def get_cam_mat_euler(cam_param, cam_pos, cam_euler):
     cam_in = get_cam_in(cam_param)    
     cam_ex = get_cam_ex_euler(cam_pos, cam_euler)
 
-    cam_mat = cam_in @ cam_ex
+    cam_mat = inv_SE2 @ cam_in @ cam_ex
     return cam_mat
 
-def get_cam_ex_lie(cam_pos, cam_att):
-    R_world2model = so3_exp(cam_att)
+def get_cam_ex_lie(cam_pos, cam_lie):
+    R_world2model = so3_exp(-cam_lie)
     cam_ex = R_model2cam @ R_world2model @ np.block([np.eye(3), -cam_pos.reshape(-1,1)])
     return cam_ex
 
-def get_cam_mat_lie(cam_param, cam_pos, cam_att):
+def get_cam_mat_lie(cam_param, cam_pos, cam_lie):
     cam_in = get_cam_in(cam_param)
-    cam_ex = get_cam_ex_lie(cam_pos, cam_att)
-    return cam_in @ cam_ex
+    cam_ex = get_cam_ex_lie(cam_pos, cam_lie)
+    return inv_SE2 @ cam_in @ cam_ex
 
+def get_cam_ex_mrp(cam_pos, cam_mrp):
+    R_world2model = mrp2dcm(cam_mrp)
+    cam_ex = R_model2cam @ R_world2model @ np.block([np.eye(3), -cam_pos.reshape(-1,1)])
+    return cam_ex
+
+def get_cam_mat_mrp(cam_param, cam_pos, cam_mrp):
+    cam_in = get_cam_in(cam_param)
+    cam_ex = get_cam_ex_mrp(cam_pos, cam_mrp)
+    return inv_SE2 @ cam_in @ cam_ex
+
+def get_cam_ex_dcm(cam_pos, R):
+   cam_ex = R_model2cam @ R @ np.block([np.eye(3), -cam_pos.reshape(-1,1)])
+   return cam_ex
+
+def get_cam_mat_dcm(cam_param, cam_pos, R):
+    cam_in = get_cam_in(cam_param)
+    cam_ex = get_cam_ex_dcm(cam_pos, R)
+    return inv_SE2 @ cam_in @ cam_ex
+
+def get_ray(K, R, p_h):
+    # x_h = K R [I | -C] X_h
+    # x_h = KR(X - C)
+    # inv(KR) x_h = X-C = v
+    R = R_model2cam @ R
+    Bp = np.linalg.inv(K @ R)
+    v = Bp @ p_h
+    v = v / np.linalg.norm(v)
+    return v
 ## Resampling based on the examples at: https://github.com/rlabbe/Kalman-and-Bayesian-Filters-in-Python/blob/master/12-Particle-Filters.ipynb
 ## originally by Roger Labbe, under an MIT License
 def systematic_resample(weights):

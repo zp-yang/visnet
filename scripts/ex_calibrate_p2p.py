@@ -24,6 +24,7 @@ class RotRepr(enum.Enum):
 # load calibration data and camera info
 calib_data = None
 calib_dir = f"{data_dir}/calibration_circle/"
+
 with open(f"{calib_dir}calib_data.json", 'r') as fs:
     calib_data = json.load(fs)
 cam_rois = calib_data["roi"]
@@ -89,9 +90,12 @@ undistort_img = cv2.undistort(img, K.reshape(3,3), cam_dist, None, newCameraMatr
 # x, y, w, h = dist_valid_roi
 
 rois = np.array(cam_rois[cam_name])
-points = rois[:, 0:2].astype(np.float64)
+points = (rois[:, 0:2] + rois[:, 2:4]/2).astype(np.float64)
 undistort_points = cv2.undistortPoints(np.expand_dims(points, axis=1), K.reshape(3,3), cam_dist, P=K_opt)
-undistort_rois = np.hstack([np.squeeze(undistort_points.astype(np.int64)), rois[:,2:4]])
+undistort_points = np.squeeze(undistort_points.astype(np.int64))
+
+roi_wh = 20 * np.ones(undistort_points.shape).astype(np.int64)
+undistort_rois = np.hstack([ undistort_points- roi_wh//2, roi_wh])
 
 undist_img = cv2.rectangle(undistort_img, undistort_rois[0,0:2], (undistort_rois[0,0:2] + undistort_rois[0,2:4]), (255,0,0), 2)
 undist_img = cv2.rectangle(undistort_img, undistort_rois[1,0:2], (undistort_rois[1,0:2] + undistort_rois[0,2:4]), (0,0,255), 2)
@@ -194,7 +198,10 @@ print(f"axis: {w1/theta_1}, theta_0: {theta_1}")
 print(f"roll pitch yaw (deg): \n{np.rad2deg(np.array(f_dcm2euler(R_1.T))).ravel()}\n")
 
 # approximated R_cam (manual/mocap)
-R_ = np.array(f_euler2dcm(cam_att)).T
+if cam_att.shape[0] == 4:
+    R_ = np.array(f_q2dcm(cam_att)).T
+elif cam_att.shape[0] == 3:
+    R_ = np.array(f_euler2dcm(cam_att)).T
 print(f"R_approx: \n{R_}")
 w_ = util.so3_log(R_)
 theta_ = np.linalg.norm(w_)
@@ -214,6 +221,7 @@ print(f"euler: \n{np.rad2deg(np.array(f_dcm2euler(R_cam.T))).ravel()}")
 # cam_mat = util.get_cam_mat_lie(K_opt.reshape(-1), cam_pos, w_cam_0)
 # cam_mat = util.get_cam_mat_euler(K_opt.reshape(-1), cam_pos, cam_att)
 cam_mat = util.get_cam_mat_dcm(K_opt.reshape(-1), cam_pos, R_cam)
+# cam_mat = util.get_cam_mat_dcm(K_opt.reshape(-1), cam_pos, R_)
 
 pix1 = np.array(cam_mat @ np.hstack([obj_pos_1, 1])).reshape(-1)
 pix1 = pix1[0:2]/pix1[2]

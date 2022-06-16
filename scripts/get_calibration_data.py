@@ -19,7 +19,7 @@ print(data_dir)
 cam_names = [
     "camera_0",
     "camera_1",
-    # "camera_2",
+    "camera_2",
     "camera_3",
     ]
 
@@ -56,36 +56,40 @@ def get_cam_world_pos():
 
     return cam_poses
 
-def get_cam_pixel_pos():
+def get_cam_pixel_pos(capture_mask=[0, 0, 1, 0]):
     cam_rois = {}
 
-    for cam in cam_names:
-        img_msg = rospy.wait_for_message(f"{cam}/image_raw/compressed/compressed", CompressedImage)
-        bridge = CvBridge()
-        cv_img = bridge.compressed_imgmsg_to_cv2(img_msg, "bgr8")
-        window_name = f"{cam}_calibration"
-        cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-        cv2.imshow(window_name, cv_img)
-        roi = cv2.selectROIs(window_name, cv_img, showCrosshair=True)
-        cam_rois[cam] = roi.tolist()
-        print(roi)
-        if cv2.waitKey(0) & 0xFF == ord('q'):
-            print("q is pressed")
-            cv2.destroyAllWindows()
+    for cam, mask in zip(cam_names, capture_mask):
+        if not mask:
+            img_msg = rospy.wait_for_message(f"{cam}/image_raw/compressed/compressed", CompressedImage)
+            bridge = CvBridge()
+            cv_img = bridge.compressed_imgmsg_to_cv2(img_msg, "bgr8")
+            window_name = f"{cam}_calibration"
+            cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+            cv2.imshow(window_name, cv_img)
+            roi = cv2.selectROIs(window_name, cv_img, showCrosshair=True)
+            cam_rois[cam] = roi.tolist()
+            print(roi)
+            if cv2.waitKey(0) & 0xFF == ord('q'):
+                print("q is pressed")
+                cv2.destroyAllWindows()
+
     print(cam_rois)
     return cam_rois
 
-def save_cam_view(save_dir):
-    for cam in cam_names:
-        img_msg = rospy.wait_for_message(f"{cam}/image_raw/compressed/compressed", CompressedImage)
-        bridge = CvBridge()
-        cv_img = bridge.compressed_imgmsg_to_cv2(img_msg, "bgr8")
-        cv2.imwrite(f"{save_dir}/{cam}_view.jpg", cv_img)
+def save_cam_view(save_dir, capture_mask=[0, 0, 1, 0]):
+    for cam, mask in zip(cam_names, capture_mask):
+        if not mask:
+            img_msg = rospy.wait_for_message(f"{cam}/image_raw/compressed/compressed", CompressedImage)
+            bridge = CvBridge()
+            cv_img = bridge.compressed_imgmsg_to_cv2(img_msg, "bgr8")
+            cv2.imwrite(f"{save_dir}/{cam}_view.jpg", cv_img)
 
 def main(args):
     import json
     from datetime import date, datetime
     import os, errno
+    print(args)
     cam_poses = get_cam_world_pos()
     if not args.pose_only:
         cam_rois = get_cam_pixel_pos()
@@ -114,8 +118,8 @@ def main(args):
 if __name__=="__main__":
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("save_img", type=bool)
-    parser.add_argument("--pose_only", type=bool)
+    parser.add_argument("--save_img", action="store_true")
+    parser.add_argument("--pose_only", action="store_true")
     args = parser.parse_args()
     rospy.init_node("extrinsic_calibration")
 

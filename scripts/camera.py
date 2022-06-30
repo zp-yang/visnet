@@ -1,17 +1,22 @@
 import util
 import numpy as np
 class Camera:
-    def __init__(self, cam_param, cam_pos, cam_att):
+    def __init__(self, cam_param, cam_pos, cam_att, type="euler"):
         self.param = cam_param
         self.pos = cam_pos
         self.att = cam_att
-        self.R_cam = util.so3_exp(self.att)
         self.K = util.get_cam_in(self.param)
+
+        if type=="lie":
+            self.R_cam = util.so3_exp(-self.att)
+            self.P = util.get_cam_mat_lie(self.param, self.pos, self.att)
+        elif type=="euler":
+            self.R_cam = util.euler2dcm(self.att)
+            self.P = util.get_cam_mat_euler(self.param, self.pos, self.att)
 
         # this rotation is kinda goofy but corrects the gazebo convention and literature convention
         self.R = util.R_model2cam @ self.R_cam 
         
-        self.P = util.get_cam_mat_euler(self.param, self.pos, self.att)
         self.range = 25 # meters
         self.fov = np.deg2rad(90) #degrees, both directions
         self.bound = 2000
@@ -105,7 +110,22 @@ class CamGroup():
         for node in self.cam_nodes:
             z.append(node.get_measurement(targets, labels))    
         return z
-            
+
+    # DLT triangulation in homogenous coordinate (the SVD method)
+    def triangulate(self, img_points):
+        A = np.zeros((self.n_cams * 2, 4))
+        for i in range(self.n_cams):
+            img_pt = img_points[i].ravel()
+            img_pt = img_pt.astype(np.int64)
+            x = img_pt[0]
+            y = img_pt[1]
+            mat = self.cam_nodes[i].P
+            A[(i * 2):(i * 2 + 1)] = x * mat[2] - mat[0]
+            A[(i * 2 + 1):(i * 2 + 2)] = y * mat[2] - mat[1]
+        u, s, vh = np.linalg.svd(A, full_matrices=True)
+        p3d = vh[-1]
+        p3d = p3d[:3] / p3d[3]
+        return p3d
 
 cam_param = [642.0926, 642.0926, 1000.5, 1000.5,0]
 # [x y z roll pitch yaw]

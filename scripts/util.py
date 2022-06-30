@@ -157,8 +157,8 @@ def get_ray(K, R, p_h):
     # x_h = K R [I | -C] X_h
     # x_h = KR(X - C)
     # inv(KR) x_h = X-C = v
-    R = R_model2cam @ R
-    Bp = np.linalg.inv(K @ R)
+    R_ = R_model2cam @ R
+    Bp = np.linalg.inv(inv_SE2 @ K @ R_)
     v = Bp @ p_h
     v = v / np.linalg.norm(v)
     return v

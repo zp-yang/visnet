@@ -1,0 +1,26 @@
+image_width: 1600
+image_height: 1200
+camera_name: camera_test
+camera_matrix:
+  rows: 3
+  cols: 3
+  data: [1093.89828,    0.     ,  842.92547,
+            0.     , 1097.82851,  628.23277,
+            0.     ,    0.     ,    1.     ]
+distortion_model: plumb_bob
+distortion_coefficients:
+  rows: 1
+  cols: 5
+  data: [-0.402438, 0.139134, -0.000793, -0.001870, 0.000000]
+rectification_matrix:
+  rows: 3
+  cols: 3
+  data: [1., 0., 0.,
+         0., 1., 0.,
+         0., 0., 1.]
+projection_matrix:
+  rows: 3
+  cols: 4
+  data: [811.92303,   0.     , 856.10304,   0.     ,
+           0.     , 941.94653, 636.72711,   0.     ,
+           0.     ,   0.     ,   1.     ,   0.     ]

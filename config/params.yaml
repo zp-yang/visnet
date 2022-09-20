@@ -1,0 +1,11 @@
+/**:
+    ros__parameters:
+      video_device: "/dev/video0"
+      framerate: 30.0
+      io_method: "mmap"
+      frame_id: "camera"
+      pixel_format: "mjpeg"
+      image_width: 1600
+      image_height: 1200
+      camera_name: "camera_3"
+      camera_info_url: "package://visnet/config/camera_info.yaml"

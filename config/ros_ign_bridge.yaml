@@ -1,0 +1,23 @@
+# Full set of configurations
+- ros_topic_name: "/camera_0/image"
+  ign_topic_name: "/world/visnet/model/camera_0/link/link/sensor/camera/image"
+  ros_type_name: "sensor_msgs/msg/Image"
+  ign_type_name: "ignition.msgs.Image"
+  subscriber_queue: 5       # Default 10
+  publisher_queue: 6        # Default 10
+  lazy: true                # Default "false"
+  direction: IGN_TO_ROS  # Default "BIDIRECTIONAL" - Bridge both directions
+                            # "IGN_TO_ROS" - Bridge Ignition topic to ROS
+                            # "ROS_TO_IGN" - Bridge ROS topic to Ignition
+
+# Full set of configurations
+- ros_topic_name: "/camera_0/camera_info"
+  ign_topic_name: "/world/visnet/model/camera_0/link/link/sensor/camera/camera_info"
+  ros_type_name: "sensor_msgs/msg/Image"
+  ign_type_name: "ignition.msgs.Image"
+  subscriber_queue: 5       # Default 10
+  publisher_queue: 6        # Default 10
+  lazy: true                # Default "false"
+  direction: IGN_TO_ROS  # Default "BIDIRECTIONAL" - Bridge both directions
+                            # "IGN_TO_ROS" - Bridge Ignition topic to ROS
+                            # "ROS_TO_IGN" - Bridge ROS topic to Ignition

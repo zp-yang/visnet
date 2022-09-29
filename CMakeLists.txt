@@ -21,6 +21,7 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
+find_package(ignition-gazebo6 REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/CamMsmt.msg"
@@ -37,6 +38,8 @@ install(TARGETS
 install(DIRECTORY
   launch
   config
+  worlds
+  models
   DESTINATION share/${PROJECT_NAME}
 )
 # uncomment the following section in order to fill in

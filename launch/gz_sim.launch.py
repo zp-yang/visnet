@@ -25,7 +25,7 @@ def generate_launch_description():
     pkg_share = get_package_share_directory("visnet")
 
     # Set the path to the world file
-    world_file_name = "visnet.world"
+    world_file_name = "visnet_gz.world"
     world_path = os.path.join(pkg_share, "worlds", world_file_name)
 
     # Set the path to the SDF model files.
@@ -63,6 +63,12 @@ def generate_launch_description():
         description="Full path to the world model file to load",
     )
 
+    declare_pause_cmd = DeclareLaunchArgument(
+        name="pause",
+        default_value="flase",
+        description="Start the gzserver paused or unpaused",
+    )
+
     # Specify the actions
 
     # Start Gazebo server
@@ -71,7 +77,7 @@ def generate_launch_description():
             os.path.join(pkg_gazebo_ros, "launch", "gzserver.launch.py")
         ),
         condition=IfCondition(use_simulator),
-        launch_arguments={"world": world}.items(),
+        launch_arguments={"world": world, "pause": 'true'}.items(),
     )
 
     # Start Gazebo client
@@ -90,6 +96,7 @@ def generate_launch_description():
     ld.add_action(declare_use_sim_time_cmd)
     ld.add_action(declare_use_simulator_cmd)
     ld.add_action(declare_world_cmd)
+    ld.add_action(declare_pause_cmd)
 
     # Add any actions
     ld.add_action(start_gazebo_server_cmd)

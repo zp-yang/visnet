@@ -9,9 +9,8 @@ from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
 from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, LaunchConfiguration, PythonExpression
-from launch_ros.actions import Node
+from launch_ros.actions import Node, SetRemap
 from launch_ros.substitutions import FindPackageShare
-
 from ament_index_python.packages import get_package_share_directory
 
 
@@ -101,5 +100,14 @@ def generate_launch_description():
     # Add any actions
     ld.add_action(start_gazebo_server_cmd)
     ld.add_action(start_gazebo_client_cmd)
+
+    start_rviz = Node(
+           package='rviz2',
+           executable='rviz2',
+           arguments=['-d', get_package_share_directory('visnet') + '/config/sim_camera_view.rviz']
+        )
+
+    
+    ld.add_action(start_rviz)
 
     return ld

@@ -17,6 +17,8 @@
       <density>1</density>
     </fog>
     </scene>
+    
+    <gravity>0 0 0</gravity>
 
     <light type="directional" name="sun">
       <cast_shadows>true</cast_shadows>
@@ -80,7 +82,7 @@
 
     <model name="camera_0">
       <static>true</static>
-      <pose>20 20 12 0 0 -2.2</pose>
+      <pose>20 -20 15 0 0 2.2</pose>
       <link name="camera_0">
         <visual name="visual">
           <geometry>
@@ -117,6 +119,11 @@
           </camera>
           <update_rate>30.0</update_rate>
           <plugin name="camera_0_controller" filename="libgazebo_ros_camera.so">
+            <ros>
+              <!-- <namespace>demo_cam</namespace> -->
+              <!-- TODO(louise) Remapping not working due to https://github.com/ros-perception/image_common/issues/93 -->
+              <argument>--ros-args --remap image_raw:=image</argument>
+            </ros>
             <hack_baseline>0.07</hack_baseline>
           </plugin>
         </sensor>
@@ -127,7 +134,7 @@
 
     <model name="camera_1">
       <static>true</static>
-      <pose>20 20 12 0 0 -2.2</pose>
+      <pose>-20 -20 12 0 0 0.7</pose>
       <link name="camera_0">
         <visual name="visual">
           <geometry>
@@ -174,7 +181,7 @@
 
     <model name="camera_2">
       <static>true</static>
-      <pose>20 20 12 0 0 -2.2</pose>
+      <pose>-20 20 12 0 0 -0.7</pose>
       <link name="camera_0">
         <visual name="visual">
           <geometry>

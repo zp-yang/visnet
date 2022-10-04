@@ -1,7 +1,4 @@
 #!/usr/bin/env python3
-from pydoc import cli
-from telnetlib import RCP
-from tkinter.messagebox import NO
 import numpy as np
 from numpy.core.arrayprint import printoptions
 from numpy.linalg import pinv
@@ -13,7 +10,7 @@ from rclpy.action import ActionClient
 
 from gazebo_msgs.msg import EntityState
 from gazebo_msgs.srv import SetEntityState
-import geometry_msgs.msg
+from geometry_msgs.msg import Pose
 import tf2_ros
 
 def quaternion_from_euler(ai, aj, ak):
@@ -49,6 +46,9 @@ def target_traj_circle(t, begin, end, duration):
     # return pos
     return np.array([x,y,z, 0, 0, yaw])
 
+def target_stationary(t, begin):
+    return begin
+
 def target_traj_straight(t, begin, end, duration):
     trip = int(t / duration)
 
@@ -65,51 +65,77 @@ def target_traj_straight(t, begin, end, duration):
     # return pos
     return np.concatenate([pos, att])
 
-class TargetTraj():
-    def __init__(self, client, target_name, start, traj_f=None, *traj_args) -> None:
-        self.client = client
+class TargetTraj(Node):
+    """
+    Move a target entity(gazebo model) along a set trajectory defined by traj_f
+    traj_f should always take @t and @begin_pose as the first two arguments
+    """
+    def __init__(self, target_name=None, traj_f=None, begin_pose=np.zeros(6, dtype=np.float64), *traj_args) -> None:
+        super().__init__(f"{target_name}_trajectory")
+        self.client = self.create_client(SetEntityState, "/set_entity_state")
+        while not self.client.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('gazebo set_entity_state service is not availabel, waiting...')
+        
         self.target_name = target_name
         self.traj_f = traj_f
+        self.begin_pose = begin_pose
         self.traj_args = traj_args
 
-    def run(self):
-        pass
+        timer_period = 0.01
+        self.timer = self.create_timer(timer_period, self.traj_callback)
+        self.elapsed = 0
+        self.time_last = self.get_clock().now()
 
-def main(args=None):
-    rclpy.init(args=args)
-    node = rclpy.create_node("set_target_traj")
-    client = node.create_client(SetEntityState, "/set_entity_state")
-    print("waiting for service")
-    while not client.wait_for_service(timeout_sec=1.0):
-        node.get_logger().info('gazebo set_entity_state service is not availabel, waiting...')
+        print(f"setting state for {self.target_name}")
+        self.state_msg = EntityState()
+        self.state_msg.name = self.target_name
+        # state_msg.reference_frame = "world" # default frame
 
-    model_name = 'drone_0'
-    begin = [0.0, 0.0, 15.0]
-
-    state_msg = EntityState()
-    state_msg.name = model_name
-    # state_msg.reference_frame = "world" # default frame
-
-    state_msg.pose.position.x = begin[0]
-    state_msg.pose.position.y = begin[1]
-    state_msg.pose.position.z = begin[2]
-    state_msg.pose.orientation.x = 0.
-    state_msg.pose.orientation.y = 0.
-    state_msg.pose.orientation.z = 0.
-    state_msg.pose.orientation.w = 1.
-
-    request = SetEntityState.Request()
+        self.state_msg.pose.position.x = self.begin_pose[0]
+        self.state_msg.pose.position.y = self.begin_pose[1]
+        self.state_msg.pose.position.z = self.begin_pose[2]
     
-    while rclpy.ok():        
-        request.state = state_msg
-        future = client.call_async(request)
-        print(future.done())
+        print(f"set initial states for {self.target_name}")
+
+        self.request = SetEntityState.Request()
+
+    def traj_callback(self):
+        self.elapsed += (self.get_clock().now()-self.time_last).nanoseconds / 1e9
+        self.time_last = self.get_clock().now()
+
+        _pose = self.traj_f(self.elapsed, self.begin_pose, *self.traj_args)
+
+        self.state_msg.pose.position.x = _pose[0]
+        self.state_msg.pose.position.y = _pose[1]
+        self.state_msg.pose.position.z = _pose[2]
+
+        _q = quaternion_from_euler(_pose[3], _pose[4], _pose[5])
+        self.state_msg.pose.orientation.x = _q[0]
+        self.state_msg.pose.orientation.y = _q[1]
+        self.state_msg.pose.orientation.z = _q[2]
+        self.state_msg.pose.orientation.w = _q[3]
+        
+        self.request.state = self.state_msg
+        future = self.client.call_async(self.request)
         if future.done():
             response = future.result()
             print("response: " + response)
-        rclpy.spin_once(node=node)
 
-    node.destroy_node()
+def main(args=None):
+    rclpy.init(args=args)
+    executor = rclpy.get_global_executor()
+
+    x0_1 = np.array([-20, -4, 20, 0, 0, 0], dtype=np.float64)
+    x0_2 = np.array([20, 4, 20, 0, 0, 0], dtype=np.float64)
+
+    traj_1 = TargetTraj("drone_0", target_traj_straight, x0_1, x0_1+[40,0,0,0,0,0], 30)
+    traj_2 = TargetTraj("drone_1", target_traj_straight, x0_2, x0_2+[-40,0,0,0,0,0], 15)
+
+    executor.add_node(traj_1)
+    executor.add_node(traj_2)
+    
+    executor.spin()
+
     rclpy.shutdown()
 
 if __name__ == '__main__':

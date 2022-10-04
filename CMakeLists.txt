@@ -21,7 +21,7 @@ find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
-find_package(ignition-gazebo6 REQUIRED)
+# find_package(ignition-gazebo6 REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/CamMsmt.msg"

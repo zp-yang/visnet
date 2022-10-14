@@ -40,6 +40,7 @@ install(DIRECTORY
   config
   worlds
   models
+  scripts
   DESTINATION share/${PROJECT_NAME}
 )
 # uncomment the following section in order to fill in

@@ -65,6 +65,9 @@ def target_traj_straight(t, begin, end, duration):
     # return pos
     return np.concatenate([pos, att])
 
+def target_traj_f_file(t, begin):
+    pass
+
 class TargetTraj(Node):
     """
     Move a target entity(gazebo model) along a set trajectory defined by traj_f

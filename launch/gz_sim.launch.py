@@ -5,7 +5,7 @@
 
 import os
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription, ExecuteProcess
 from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, LaunchConfiguration, PythonExpression
@@ -26,6 +26,9 @@ def generate_launch_description():
     # Set the path to the world file
     world_file_name = "visnet_gz.world"
     world_path = os.path.join(pkg_share, "worlds", world_file_name)
+
+    # Set the path to the python scripts
+    script_dir = os.path.join(pkg_share, "scripts") 
 
     # Set the path to the SDF model files.
     gazebo_models_path = os.path.join(pkg_share, "models")
@@ -104,10 +107,14 @@ def generate_launch_description():
     start_rviz = Node(
            package='rviz2',
            executable='rviz2',
-           arguments=['-d', get_package_share_directory('visnet') + '/config/sim_camera_view.rviz']
+           arguments=['-d', pkg_share + '/config/sim_camera_view.rviz']
         )
-
-    
     ld.add_action(start_rviz)
+
+    move_entity = ExecuteProcess(
+        cmd=['python3', script_dir+'/set_entity_state.py'],
+        output='screen'
+    )
+    ld.add_action(move_entity)
 
     return ld

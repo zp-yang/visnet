@@ -43,7 +43,6 @@ def target_traj_circle(t, begin, end, duration):
     z = begin[2]
     yaw = -(theta + np.pi/2)
     pos = np.array([x, y, z])
-    # return pos
     return np.array([x,y,z, 0, 0, yaw])
 
 def target_stationary(t, begin):
@@ -132,7 +131,7 @@ def main(args=None):
     x0_2 = np.array([20, 4, 20, 0, 0, 0], dtype=np.float64)
 
     traj_1 = TargetTraj("drone_0", target_traj_straight, x0_1, x0_1+[40,0,0,0,0,0], 30)
-    traj_2 = TargetTraj("drone_1", target_traj_straight, x0_2, x0_2+[-40,0,0,0,0,0], 15)
+    traj_2 = TargetTraj("drone_1", target_traj_straight, x0_2, x0_2+[-40,0,0,0,0,0], 8)
 
     executor.add_node(traj_1)
     executor.add_node(traj_2)

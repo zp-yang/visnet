@@ -43,35 +43,35 @@ def generate_launch_description():
         Node(
             package='gscam',
             executable='gscam_node',
-            namespace='camera_0',
+            namespace='camera_1',
             parameters=[
-                {'gscam_config': 'v4l2src device=/dev/video2 ! image/jpeg,width=1600,height=1200,framerate=30/1 ! jpegdec ! videoconvert'},
+                {'gscam_config': 'v4l2src device=/dev/video6 ! image/jpeg,width=1600,height=1200,framerate=30/1 ! jpegdec ! videoconvert'},
                 {'camera_info_url': 'package://visnet/config/camera_1.yaml'},
-                {'frame_id': 'camera_0'},
+                {'frame_id': 'camera_1'},
             ],
             remappings=cam_remap(1)
         ),
 
-        # Node(
-        #     package='gscam',
-        #     executable='gscam_node',
-        #     namespace='camera_0',
-        #     parameters=[
-        #         {'gscam_config': 'v4l2src device=/dev/video0 ! image/jpeg,width=1600,height=1200,framerate=30/1 ! jpegdec ! videoconvert'},
-        #         {'camera_info_url': 'package://visnet/config/camera_2.yaml'},
-        #         {'frame_id': 'camera_0'},
-        #     ],
-        #     remappings=cam_remap(2)
-        # ),
+        Node(
+            package='gscam',
+            executable='gscam_node',
+            namespace='camera_2',
+            parameters=[
+                {'gscam_config': 'v4l2src device=/dev/video8 ! image/jpeg,width=1600,height=1200,framerate=30/1 ! jpegdec ! videoconvert'},
+                {'camera_info_url': 'package://visnet/config/camera_2.yaml'},
+                {'frame_id': 'camera_2'},
+            ],
+            remappings=cam_remap(2)
+        ),
 
         Node(
             package='gscam',
             executable='gscam_node',
-            namespace='camera_0',
+            namespace='camera_3',
             parameters=[
-                {'gscam_config': 'v4l2src device=/dev/video4 ! image/jpeg,width=1600,height=1200,framerate=30/1 ! jpegdec ! videoconvert'},
+                {'gscam_config': 'v4l2src device=/dev/video10 ! image/jpeg,width=1600,height=1200,framerate=30/1 ! jpegdec ! videoconvert'},
                 {'camera_info_url': 'package://visnet/config/camera_3.yaml'},
-                {'frame_id': 'camera_0'},
+                {'frame_id': 'camera_3'},
             ],
             remappings=cam_remap(3)
         ),

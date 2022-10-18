@@ -8,12 +8,6 @@ from cv_bridge import CvBridge, CvBridgeError
 from sensor_msgs.msg import Image, CompressedImage
 from geometry_msgs.msg import PoseStamped
 
-# 1. needs to get camera pose
-# 2. needs to select other camera in the frame ROI
-# 3. calibrate this camera's orientation using other camera's position and ROI position
-# 4. save the new projectin matrix to somewhere ?.yaml?
-# Note: qualisys node should be running
-
 data_dir = os.path.abspath( os.path.join(os.path.dirname(__file__), os.pardir)) + "/data/" 
 print(data_dir)
 cam_names = [
@@ -51,7 +45,7 @@ def get_cam_world_pos(node: Node):
     cam_poses = {}
     for cam in cam_names:
         print(f"getting position of {cam}...")
-        msg_: PoseStamped = wait_for_message(node, PoseStamped, f"/qualisys/{cam}/pose")
+        msg_: PoseStamped = wait_for_message(node, PoseStamped, f"/{cam}/pose")
         cam_poses[cam] = [msg_.pose.position.x, msg_.pose.position.y, msg_.pose.position.z, 0, 0, 0]
 
     print(cam_poses)
@@ -61,7 +55,7 @@ def get_cam_pixel_pos(node: Node):
     cam_rois = {}
 
     for cam in cam_names:
-        img_msg = wait_for_message(node, CompressedImage, f"{cam}/camera/image_raw/compressed")
+        img_msg = wait_for_message(node, CompressedImage, f"/{cam}/image/compressed")
         bridge = CvBridge()
         cv_img = bridge.compressed_imgmsg_to_cv2(img_msg, "bgr8")
         window_name = f"{cam}_calibration"
@@ -79,7 +73,7 @@ def get_cam_pixel_pos(node: Node):
 
 def save_cam_view(node: Node, save_dir):
     for cam in cam_names:
-        img_msg = wait_for_message(node, CompressedImage, f"{cam}/camera/image_raw/compressed")
+        img_msg = wait_for_message(node, CompressedImage, f"/{cam}/image/compressed")
         bridge = CvBridge()
         cv_img = bridge.compressed_imgmsg_to_cv2(img_msg, "bgr8")
         cv2.imwrite(f"{save_dir}/{cam}_view.jpg", cv_img)
@@ -94,6 +88,7 @@ def main(args=None):
     
     cam_poses = get_cam_world_pos(node)
     cam_rois = get_cam_pixel_pos(node)
+    # cam_rois = []
 
     try:
         date_str = f"{date.today().strftime('%Y-%m-%d')}-{datetime.now().time().strftime('%I%M%S')}"

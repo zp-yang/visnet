@@ -16,13 +16,18 @@ def generate_launch_description():
         Node(
            package='rviz2',
            executable='rviz2',
-           arguments=['-d', get_package_share_directory('visnet') + '/config/camera_view.rviz']
+           arguments=['-d', get_package_share_directory('visnet') + '/config/bag_view.rviz']
         ),
         launch.actions.ExecuteProcess(
             cmd=['ros2', 'bag', 'play',
-                '/home/zpyang/rosbags/multicam-2022-09-10-105836',
+                '/home/zpyang/rosbags/multicam-2022-10-17-051910',
                 '-l'
                 ],
             output='screen'
+        ),
+
+        launch.actions.ExecuteProcess(
+            cmd=['rqt'],
+            output='screen',
         )
     ])

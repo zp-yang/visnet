@@ -43,11 +43,11 @@ def generate_launch_description():
         Node(
             package='gscam',
             executable='gscam_node',
-            namespace='camera_0',
+            namespace='camera_1',
             parameters=[
                 {'gscam_config': 'v4l2src device=/dev/video2 ! image/jpeg,width=1600,height=1200,framerate=30/1 ! jpegdec ! videoconvert'},
                 {'camera_info_url': 'package://visnet/config/camera_1.yaml'},
-                {'frame_id': 'camera_0'},
+                {'frame_id': 'camera_1'},
             ],
             remappings=cam_remap(1)
         ),
@@ -55,11 +55,11 @@ def generate_launch_description():
         # Node(
         #     package='gscam',
         #     executable='gscam_node',
-        #     namespace='camera_0',
+        #     namespace='camera_2',
         #     parameters=[
-        #         {'gscam_config': 'v4l2src device=/dev/video0 ! image/jpeg,width=1600,height=1200,framerate=30/1 ! jpegdec ! videoconvert'},
+        #         {'gscam_config': 'v4l2src device=/dev/video4 ! image/jpeg,width=1600,height=1200,framerate=30/1 ! jpegdec ! videoconvert'},
         #         {'camera_info_url': 'package://visnet/config/camera_2.yaml'},
-        #         {'frame_id': 'camera_0'},
+        #         {'frame_id': 'camera_2'},
         #     ],
         #     remappings=cam_remap(2)
         # ),
@@ -67,11 +67,11 @@ def generate_launch_description():
         Node(
             package='gscam',
             executable='gscam_node',
-            namespace='camera_0',
+            namespace='camera_3',
             parameters=[
                 {'gscam_config': 'v4l2src device=/dev/video4 ! image/jpeg,width=1600,height=1200,framerate=30/1 ! jpegdec ! videoconvert'},
                 {'camera_info_url': 'package://visnet/config/camera_3.yaml'},
-                {'frame_id': 'camera_0'},
+                {'frame_id': 'camera_3'},
             ],
             remappings=cam_remap(3)
         ),
@@ -82,13 +82,17 @@ def generate_launch_description():
            arguments=['-d', get_package_share_directory('visnet') + '/config/camera_view.rviz']
         ),
         
-        # launch.actions.ExecuteProcess(
-        #     cmd=['ros2', 'bag', 'record',
-        #         '-o', f'/home/zpyang/rosbags/multicam-{date_str}',
-        #         '/camera_0/camera/image_raw/compressed',
-        #         '/camera_1/camera/image_raw/compressed',
-        #         '/camera_3/camera/image_raw/compressed',
-        #         ],
-        #     output='screen'
-        # )
+        launch.actions.ExecuteProcess(
+            cmd=['ros2', 'bag', 'record',
+                '-o', f'/home/zpyang/rosbags/multicam-{date_str}',
+                '/camera_0/image/compressed',
+                '/camera_1/image/compressed',
+                '/camera_3/image/compressed',
+                '/camera_0/pose',
+                '/camera_1/pose',
+                '/camera_3/pose',
+                '/hb1/pose',
+                ],
+            output='screen'
+        )
     ])

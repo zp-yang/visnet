@@ -2,11 +2,11 @@
 import numpy as np
 from numpy.core.arrayprint import printoptions
 from numpy.linalg import pinv
-from concurrent.futures import ThreadPoolExecutor
 
 import rclpy
 from rclpy.node import Node
-from rclpy.action import ActionClient
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
+from rclpy.executors import MultiThreadedExecutor
 
 from gazebo_msgs.msg import EntityState
 from gazebo_msgs.srv import SetEntityState
@@ -65,23 +65,50 @@ def target_traj_straight(t, begin, end, duration):
     # return pos
     return np.concatenate([pos, att])
 
-def target_traj_f_file(t, begin):
-    pass
+def target_traj_f_file(t, traj_data):
+
+    reverse = True
+
+    duration = traj_data[-1,0]
+    # if duration == 0:
+    #     duration = traj_data[0,0]
+    trip = int(t / duration)
+    t = t - trip*duration
+
+
+    if (trip % 2):
+        traj_data_fliped = np.flip(traj_data, axis=0)
+        t_list = duration - traj_data_fliped[:,0]
+        x = np.interp(t, t_list, traj_data_fliped[:,1])
+        y = np.interp(t, t_list, traj_data_fliped[:,2])
+        z = 20.0        
+    else:
+        x = np.interp(t, traj_data[:,0], traj_data[:,1])
+        y = np.interp(t, traj_data[:,0], traj_data[:,2])
+        z = 20.0
+
+    return np.array([x, y, z, 0., 0., 0.])
 
 class TargetTraj(Node):
     """
     Move a target entity(gazebo model) along a set trajectory defined by traj_f
     traj_f should always take @t and @begin_pose as the first two arguments
     """
-    def __init__(self, target_name=None, traj_f=None, begin_pose=np.zeros(6, dtype=np.float64), *traj_args) -> None:
-        super().__init__(f"{target_name}_trajectory")
+    def __init__(self, target_name=None, traj_f=None, *traj_args) -> None:
+        super().__init__(f"set_{target_name}_trajectory")
+        # self.client_cb_group = MutuallyExclusiveCallbackGroup()
+        # self.timer_cb_group = MutuallyExclusiveCallbackGroup()
+
+        # self.client_cb_group = ReentrantCallbackGroup()
+        # self.timer_cb_group = ReentrantCallbackGroup()
+        
         self.client = self.create_client(SetEntityState, "/set_entity_state")
         while not self.client.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('gazebo set_entity_state service is not availabel, waiting...')
         
         self.target_name = target_name
         self.traj_f = traj_f
-        self.begin_pose = begin_pose
+        # self.begin_pose = begin_pose
         self.traj_args = traj_args
 
         timer_period = 0.01
@@ -92,13 +119,13 @@ class TargetTraj(Node):
         print(f"setting state for {self.target_name}")
         self.state_msg = EntityState()
         self.state_msg.name = self.target_name
-        # state_msg.reference_frame = "world" # default frame
+        # self.state_msg.reference_frame = "world" # default frame
 
-        self.state_msg.pose.position.x = self.begin_pose[0]
-        self.state_msg.pose.position.y = self.begin_pose[1]
-        self.state_msg.pose.position.z = self.begin_pose[2]
+        # self.state_msg.pose.position.x = self.begin_pose[0]
+        # self.state_msg.pose.position.y = self.begin_pose[1]
+        # self.state_msg.pose.position.z = self.begin_pose[2]
     
-        print(f"set initial states for {self.target_name}")
+        # print(f"set initial states for {self.target_name}")
 
         self.request = SetEntityState.Request()
 
@@ -106,7 +133,8 @@ class TargetTraj(Node):
         self.elapsed += (self.get_clock().now()-self.time_last).nanoseconds / 1e9
         self.time_last = self.get_clock().now()
 
-        _pose = self.traj_f(self.elapsed, self.begin_pose, *self.traj_args)
+        # _pose = self.traj_f(self.elapsed, self.begin_pose, *self.traj_args)
+        _pose = self.traj_f(self.elapsed, *self.traj_args)
 
         self.state_msg.pose.position.x = _pose[0]
         self.state_msg.pose.position.y = _pose[1]
@@ -124,22 +152,37 @@ class TargetTraj(Node):
             response = future.result()
             print("response: " + response)
 
-def main(args=None):
-    rclpy.init(args=args)
-    executor = rclpy.get_global_executor()
+def get_traj_data(filename):
+    traj_data = np.genfromtxt(filename, delimiter=',') 
+    traj_data = traj_data[1:, 0:3]
+    return traj_data.astype(np.float64)
 
-    x0_1 = np.array([-20, -4, 20, 0, 0, 0], dtype=np.float64)
+def main(args=None):
+    import os
+    data_dir = os.path.abspath( os.path.join(os.path.dirname(__file__), os.pardir)) + "/data/" 
+    rclpy.init(args=args)
+    
+    # executor = rclpy.get_global_executor()
+    executor = MultiThreadedExecutor()
+    
+    x0_1 = np.array([-40, 5, 20, 0, 0, 0], dtype=np.float64)
     x0_2 = np.array([20, 4, 20, 0, 0, 0], dtype=np.float64)
 
-    traj_1 = TargetTraj("drone_0", target_traj_straight, x0_1, x0_1+[40,0,0,0,0,0], 30)
-    traj_2 = TargetTraj("drone_1", target_traj_straight, x0_2, x0_2+[-40,0,0,0,0,0], 15)
+    traj_data = get_traj_data(data_dir+"drone_traj.csv")
+    # traj_1 = TargetTraj("hb1", target_traj_f_file, traj_data)
+
+    traj_1 = TargetTraj("hb1", target_traj_straight, x0_1, x0_1+[80,0,0,0,0,0], 16)
+    # traj_2 = TargetTraj("hb2", target_traj_straight, x0_2, x0_2+[-40,0,0,0,0,0], 15)
 
     executor.add_node(traj_1)
-    executor.add_node(traj_2)
+    # executor.add_node(traj_2)
     
     executor.spin()
 
-    rclpy.shutdown()
+    try:
+        rclpy.shutdown()
+    except Exception():
+        pass
 
 if __name__ == '__main__':
     main()

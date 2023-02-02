@@ -1,0 +1,147 @@
+<sdf version='1.7'>
+  <world name='default'>
+    <plugin name="entity_state" filename="libgazebo_ros_state.so" />
+    <scene>
+      <ambient>0.4 0.4 0.4 1</ambient>
+      <background>0.7 0.7 0.7 1</background>
+      <shadows>1</shadows>
+      <sky>
+        <clouds>
+          <speed>12</speed>
+        </clouds>
+      </sky>
+      <!-- <fog>
+        <type>linear</type>
+        <start>10</start>
+        <end>500</end>
+        <density>1</density>
+      </fog> -->
+    </scene>
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose>0 0 300 0 1.57 0</pose>
+        <view_controller>orbit</view_controller>
+        <projection_type>orthographic</projection_type>
+        <!-- <track_visual>
+          <name>virtual_cam</name>
+          <follow>false</follow>
+          <xyz>-10 10 10 </xyz>
+          <static>false</static>
+          <min_dist>1.0</min_dist>
+          <max_dist>5000.0</max_dist>
+        </track_visual> -->
+      </camera>
+    </gui>
+
+    <gravity>0 0 0</gravity>
+
+    <light type="directional" name="sun">
+      <cast_shadows>false</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <model name="hk">
+      <include>
+        <uri>model://hong_kong</uri>
+        <name>hk_city</name>
+      </include>
+      <pose>0 -60 0 0 0 -0.73</pose>  
+    </model>
+    
+    <model name="hb1">
+      <include>
+        <uri>model://x500_green</uri>
+        <name>hb1</name>
+      </include>
+      <pose>0 0 1 0 0 0</pose>
+      <link name="drone_camera">
+        <sensor name="drone_tpv_camera" type="camera">
+          <pose>-0 0 20 0 1.57 -0.0</pose>
+          <camera>
+            <horizontal_fov>1</horizontal_fov>
+            <image>
+              <width>1920</width>
+              <height>1080</height>
+            </image>
+            <clip>
+              <near>0.1</near>
+              <far>10000</far>
+            </clip>
+            <distortion>
+              <k1>0</k1>
+              <k2>0</k2>
+              <k3>0</k3>
+              <p1>0</p1>
+              <p2>0</p2>
+            </distortion>
+            <always_on>1</always_on>
+            <visualize>1</visualize>
+            <lens>
+              <type>stereographic</type>
+              <scale_to_hfov>1</scale_to_hfov>
+              <cutoff_angle>2</cutoff_angle>
+            </lens>
+          </camera>
+          <update_rate>30.0</update_rate>
+          <plugin name="drone_tpv_controller" filename="libgazebo_ros_camera.so">
+            <hack_baseline>0.07</hack_baseline>
+          </plugin>
+        </sensor>
+      </link>
+    </model>
+
+    <model name="hb2">
+      <include>
+        <uri>model://x500_red_no_collision</uri>
+        <name>hb2</name>
+      </include>
+      <pose>1 0 1 0 0 0</pose>
+    </model>
+
+
+    
+      <!-- <sensor name="drone_fpv_camera" type="camera">
+        <pose>0 0 0.2 0 0 0</pose>
+        <camera>
+          <horizontal_fov>1</horizontal_fov>
+          <image>
+            <width>1600</width>
+            <height>1200</height>
+          </image>
+          <clip>
+            <near>0.1</near>
+            <far>10000</far>
+          </clip>
+          <distortion>
+            <k1>0</k1>
+            <k2>0</k2>
+            <k3>0</k3>
+            <p1>0</p1>
+            <p2>0</p2>
+          </distortion>
+          <always_on>1</always_on>
+          <visualize>1</visualize>
+          <lens>
+            <type>stereographic</type>
+            <scale_to_hfov>1</scale_to_hfov>
+            <cutoff_angle>2</cutoff_angle>
+          </lens>
+        </camera>
+        <update_rate>30.0</update_rate>
+        <plugin name="drone_fpv_controller" filename="libgazebo_ros_camera.so">
+          <hack_baseline>0.07</hack_baseline>
+        </plugin>
+      </sensor> -->
+
+
+  </world>
+</sdf>

@@ -63,7 +63,8 @@ def target_traj_straight(t, begin, end, duration):
 
     att = np.array([0,0,0])
     # return pos
-    return np.concatenate([pos, att])
+    pose = np.concatenate([pos, att])
+    return pose
 
 def target_traj_f_file(t, traj_data):
 
@@ -77,32 +78,40 @@ def target_traj_f_file(t, traj_data):
 
 
     if (trip % 2):
-        traj_data_fliped = np.flip(traj_data, axis=0)
-        t_list = duration - traj_data_fliped[:,0]
-        x = np.interp(t, t_list, traj_data_fliped[:,1])
-        y = np.interp(t, t_list, traj_data_fliped[:,2])
-        z = 20.0        
+        x = traj_data[-1, 1]
+        y = traj_data[-1, 2]
+        z = 20.0
+
+        yaw = traj_data[-1, 3]
+
+        # traj_data_fliped = np.flip(traj_data, axis=0)
+        # t_list = duration - traj_data_fliped[:,0]
+        # x = np.interp(t, t_list, traj_data_fliped[:,1])
+        # y = np.interp(t, t_list, traj_data_fliped[:,2])
+        # z = 20.0
     else:
         x = np.interp(t, traj_data[:,0], traj_data[:,1])
         y = np.interp(t, traj_data[:,0], traj_data[:,2])
         z = 20.0
 
-    return np.array([x, y, z, 0., 0., 0.])
+        yaw = np.interp(t, traj_data[:, 0], traj_data[:, 3])
+
+    return np.array([x, y, z, 0., 0., yaw])
 
 class TargetTraj(Node):
     """
     Move a target entity(gazebo model) along a set trajectory defined by traj_f
-    traj_f should always take @t and @begin_pose as the first two arguments
+    traj_f should always take @t as the first argument
     """
     def __init__(self, target_name=None, traj_f=None, *traj_args) -> None:
         super().__init__(f"set_{target_name}_trajectory")
         # self.client_cb_group = MutuallyExclusiveCallbackGroup()
         # self.timer_cb_group = MutuallyExclusiveCallbackGroup()
 
-        # self.client_cb_group = ReentrantCallbackGroup()
-        # self.timer_cb_group = ReentrantCallbackGroup()
+        self.client_cb_group = ReentrantCallbackGroup()
+        self.timer_cb_group = ReentrantCallbackGroup()
         
-        self.client = self.create_client(SetEntityState, "/set_entity_state")
+        self.client = self.create_client(SetEntityState, "/set_entity_state", callback_group=self.client_cb_group)
         while not self.client.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('gazebo set_entity_state service is not availabel, waiting...')
         
@@ -112,7 +121,7 @@ class TargetTraj(Node):
         self.traj_args = traj_args
 
         timer_period = 0.01
-        self.timer = self.create_timer(timer_period, self.traj_callback)
+        self.timer = self.create_timer(timer_period, self.traj_callback, callback_group=self.timer_cb_group)
         self.elapsed = 0
         self.time_last = self.get_clock().now()
 
@@ -154,28 +163,38 @@ class TargetTraj(Node):
 
 def get_traj_data(filename):
     traj_data = np.genfromtxt(filename, delimiter=',') 
-    traj_data = traj_data[1:, 0:3]
+    # traj_data = traj_data[:, 0:4]
     return traj_data.astype(np.float64)
 
 def main(args=None):
     import os
     data_dir = os.path.abspath( os.path.join(os.path.dirname(__file__), os.pardir)) + "/data/" 
+    print(data_dir)
     rclpy.init(args=args)
     
     # executor = rclpy.get_global_executor()
     executor = MultiThreadedExecutor()
     
-    x0_1 = np.array([-40, 5, 20, 0, 0, 0], dtype=np.float64)
-    x0_2 = np.array([20, 4, 20, 0, 0, 0], dtype=np.float64)
+    x0_1 = np.array([-40, 5, 20], dtype=np.float64)
+    x0_2 = np.array([-40, -5, 20], dtype=np.float64)
 
-    traj_data = get_traj_data(data_dir+"drone_traj.csv")
-    # traj_1 = TargetTraj("hb1", target_traj_f_file, traj_data)
+    traj_1 = TargetTraj("hb1", target_traj_straight, x0_1, [40, 5, 20], 20)
+    traj_2 = TargetTraj("hb2", target_traj_straight, x0_2, [40, -5, 20], 20)
+    ## Dawei MH video
+    # traj_data_nominal = get_traj_data(data_dir+"drone_traj.csv")
+    # traj_data_attack = get_traj_data(data_dir+"drone_traj_attack.csv")
+    # traj_1 = TargetTraj("hb1", target_traj_f_file, traj_data_nominal)
+    # traj_2 = TargetTraj("hb2", target_traj_f_file, traj_data_attack)
 
-    traj_1 = TargetTraj("hb1", target_traj_straight, x0_1, x0_1+[80,0,0,0,0,0], 16)
-    # traj_2 = TargetTraj("hb2", target_traj_straight, x0_2, x0_2+[-40,0,0,0,0,0], 15)
+    ## abu dhabi video
+    # traj_data_nominal = get_traj_data(data_dir + "hk_nominal_traj.csv")
+    # traj_1 = TargetTraj("hb1", target_traj_f_file, traj_data_nominal)
+
+    # traj_data_attack = get_traj_data(data_dir+"hk_attack_traj.csv")
+    # traj_2 = TargetTraj("hb2", target_traj_f_file, traj_data_attack)
 
     executor.add_node(traj_1)
-    # executor.add_node(traj_2)
+    executor.add_node(traj_2)
     
     executor.spin()
 

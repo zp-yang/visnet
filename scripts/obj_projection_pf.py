@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped, Point32, TransformStamped
@@ -15,7 +16,6 @@ import yaml
 from camera import Camera, CamGroup
 
 from cv_bridge import CvBridge
-from visnet.msg import CamMsmt
 import util
 from track import Track
 
@@ -95,7 +95,7 @@ class Projector(Node):
 
         self.pose_sub_ = self.create_subscription(
             PoseStamped, 
-            '/qualisys/hb1/pose', 
+            '/hb1/pose', 
             self.pose_sub_cb,
             10,
             )
@@ -150,9 +150,9 @@ class Projector(Node):
         self.cam_nodes = []
         self.msmt_subs = []
         self.paths = [[],[]]
-        self.path_buffer_len = 200
+        self.path_buffer_len = 50
 
-        pose_msg: PoseStamped = wait_for_message(self, PoseStamped, "/qualisys/hb1/pose")
+        pose_msg: PoseStamped = wait_for_message(self, PoseStamped, "/hb1/pose")
         x0_1 = np.array([pose_msg.pose.position.x, pose_msg.pose.position.y, pose_msg.pose.position.z])
         n_particles = 1000
         print(f'initial position {x0_1}')
@@ -175,8 +175,8 @@ class Projector(Node):
             if cv_img is not None and self.pos[0] is not None:
                 pix = cams[i]._get_pixel_pos(np.array([self.pos[0]]).reshape(3,1)).reshape(-1).astype(np.int32)
                 cv_img = cv2.undistort(cv_img, cams_pinhole_K[i].reshape(3,3), cams_dist[i], None, cams[i].K)
-                cv_img = cv2.rectangle(cv_img, pix-[25,25], pix+[25,25], (0,10,255), 3)
-                x, y, w, h = dist_valid_roi
+                cv_img = cv2.rectangle(cv_img, pix-[40,40], pix+[40,40], (0,255,100), 3)
+                # x, y, w, h = dist_valid_roi
                 # msg_ = self.bridge.cv2_to_imgmsg(cv_img[y:y+h, x:x+w], encoding="bgr8")
                 # self.img_pubs[m-1].publish(msg_)
                 msg = self.bridge.cv2_to_imgmsg(cv_img, encoding="bgr8")

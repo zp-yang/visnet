@@ -13,7 +13,9 @@ To source the project
 
 `. install/setup.bash`
 
-To launch simulator
+To launch simulator (classic gazebo)
+
+Install classic gazebo first`sudo apt install ros-humble-gazebo-ros-pkgs ros-humble-gazebo-ros`
 
 `ros2 launch visnet gz_sim.launch.py`
 

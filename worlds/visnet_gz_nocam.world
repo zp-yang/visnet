@@ -1,0 +1,214 @@
+<sdf version='1.7'>
+  <world name='visnet'>
+    <plugin name="entity_state" filename="libgazebo_ros_state.so"/>
+    <scene>
+      <ambient>0.4 0.4 0.4 1</ambient>
+      <background>0.7 0.7 0.7 1</background>
+      <shadows>1</shadows>
+    <sky>
+    <clouds>
+      <speed>12</speed>
+    </clouds>
+    </sky>
+    <fog>
+      <type>linear</type>
+      <start>10</start>
+      <end>500</end>
+      <density>1</density>
+    </fog>
+    </scene>
+    
+    <gravity>0 0 0</gravity>
+
+    <light type="directional" name="sun">
+      <cast_shadows>false</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.8 0.8 0.8 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <attenuation>
+        <range>1000</range>
+        <constant>0.9</constant>
+        <linear>0.01</linear>
+        <quadratic>0.001</quadratic>
+      </attenuation>
+      <direction>-0.5 0.1 -0.9</direction>
+    </light>
+
+    <model name="ground_plane">
+      <static>true</static>
+      <link name="link">
+        <collision name="collision">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+            </plane>
+          </geometry>
+        </collision>
+        <visual name="visual">
+          <geometry>
+            <plane>
+              <normal>0 0 1</normal>
+              <size>100 100</size>
+            </plane>
+          </geometry>
+          <material>
+            <ambient>0.8 0.8 0.8 1</ambient>
+            <diffuse>0.8 0.8 0.8 1</diffuse>
+            <specular>0.8 0.8 0.8 1</specular>
+          </material>
+        </visual>
+      </link>
+    </model>
+
+    <include>
+      <uri>https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/House 1</uri>
+      <pose>-20.0 30.0 0 0 -0 0</pose>
+    </include>
+
+    <include>
+      <uri>https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/House 2</uri>
+      <pose>-20.0 -20.0 0 0 -0 0</pose>
+    </include>
+
+    <include>
+      <uri>https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/House 3</uri>
+      <pose>20.0 30.0 0 0 -0 0</pose>
+    </include>
+
+    <include>
+      <uri>https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/school</uri>
+      <pose>20.0 -20.0 0 0 -0 0</pose>
+    </include>
+
+    <model name="camera_0">
+      <static>true</static>
+      <pose>20 -20 15 0 0 2.2</pose>
+      <link name="camera_0">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.3 0.1 0.1</size>
+            </box>
+          </geometry>
+          <material> <!-- LED material -->
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+            <specular>0 0 0 0</specular>
+            <emissive>0 1 0 1</emissive>
+          </material> <!-- End LED material -->
+        </visual>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+      </link>
+    </model>
+
+    <model name="camera_1">
+      <static>true</static>
+      <pose>-20 -20 12 0 0 0.7</pose>
+      <link name="camera_0">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.3 0.1 0.1</size>
+            </box>
+          </geometry>
+          <material> <!-- LED material -->
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+            <specular>0 0 0 0</specular>
+            <emissive>0 1 0 1</emissive>
+          </material> <!-- End LED material -->
+        </visual>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+      </link>
+    </model>
+
+    <model name="camera_2">
+      <static>true</static>
+      <pose>-20 30 12 0 0 -0.7</pose>
+      <link name="camera_0">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.3 0.1 0.1</size>
+            </box>
+          </geometry>
+          <material> <!-- LED material -->
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+            <specular>0 0 0 0</specular>
+            <emissive>0 1 0 1</emissive>
+          </material> <!-- End LED material -->
+        </visual>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+      </link>
+    </model>
+
+    <model name="camera_3">
+      <static>true</static>
+      <pose>20 30 12 0 0 -2.2</pose>
+      <link name="camera_0">
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.3 0.1 0.1</size>
+            </box>
+          </geometry>
+          <material> <!-- LED material -->
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+            <specular>0 0 0 0</specular>
+            <emissive>0 1 0 1</emissive>
+          </material> <!-- End LED material -->
+        </visual>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+      </link>
+    </model>
+
+    <model name="hb1">
+      <include>
+        <uri>model://x500_green</uri>
+        <name>hb1</name>
+      </include>
+      <pose>0 0 1 0 0 0</pose>
+    </model>
+
+    <model name="hb2">
+      <include>
+        <uri>model://x500_red_no_collision</uri>
+        <name>hb2</name>
+      </include>
+      <pose>1 0 1 0 0 0</pose>
+    </model>
+
+    <!-- <model name="drone_1">
+      <include>
+        <uri>model://x500</uri>
+        <name>drone_1</name>
+      </include>
+      <pose>1 0 1 0 0 0</pose>
+    </model> -->
+
+    <!-- <model name="bird">
+      <include>
+        <uri>model://eagle</uri>
+        <name>bird</name>
+      </include>
+      <pose>0 1 1 0 0 0</pose>
+    </model> -->
+
+    <gui fullscreen='0'>
+      <camera name='user_camera'>
+        <pose>-9.6407 49.4187 41.7671 0 0.6058 -1.55978</pose>
+        <view_controller>orbit</view_controller>
+        <projection_type>perspective</projection_type>
+      </camera>
+    </gui>
+
+  </world>
+
+</sdf>
+<!-- vim: set et fenc=utf-8 ff=unix sts=0 sw=2 ts=2 ft=xml: -->

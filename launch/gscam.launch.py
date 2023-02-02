@@ -82,17 +82,17 @@ def generate_launch_description():
            arguments=['-d', get_package_share_directory('visnet') + '/config/camera_view.rviz']
         ),
         
-        launch.actions.ExecuteProcess(
-            cmd=['ros2', 'bag', 'record',
-                '-o', f'/home/zpyang/rosbags/multicam-{date_str}',
-                '/camera_0/image/compressed',
-                '/camera_1/image/compressed',
-                '/camera_3/image/compressed',
-                '/camera_0/pose',
-                '/camera_1/pose',
-                '/camera_3/pose',
-                '/hb1/pose',
-                ],
-            output='screen'
-        )
+        # launch.actions.ExecuteProcess(
+        #     cmd=['ros2', 'bag', 'record',
+        #         '-o', f'/home/zpyang/rosbags/multicam-{date_str}',
+        #         '/camera_0/image/compressed',
+        #         '/camera_1/image/compressed',
+        #         '/camera_3/image/compressed',
+        #         '/camera_0/pose',
+        #         '/camera_1/pose',
+        #         '/camera_3/pose',
+        #         '/hb1/pose',
+        #         ],
+        #     output='screen'
+        # )
     ])

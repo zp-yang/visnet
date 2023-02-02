@@ -62,7 +62,7 @@
 
     <include>
       <uri>https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/House 1</uri>
-      <pose>-20.0 20.0 0 0 -0 0</pose>
+      <pose>-20.0 30.0 0 0 -0 0</pose>
     </include>
 
     <include>
@@ -72,7 +72,7 @@
 
     <include>
       <uri>https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/House 3</uri>
-      <pose>20.0 20.0 0 0 -0 0</pose>
+      <pose>20.0 30.0 0 0 -0 0</pose>
     </include>
 
     <include>
@@ -90,6 +90,12 @@
               <size>0.3 0.1 0.1</size>
             </box>
           </geometry>
+          <material> <!-- LED material -->
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+            <specular>0 0 0 0</specular>
+            <emissive>0 1 0 1</emissive>
+          </material> <!-- End LED material -->
         </visual>
         <sensor name="camera_0" type="camera">
           <camera>
@@ -100,7 +106,7 @@
             </image>
             <clip>
               <near>0.1</near>
-              <far>100</far>
+              <far>500</far>
             </clip>
             <distortion>
               <k1>0</k1>
@@ -142,6 +148,12 @@
               <size>0.3 0.1 0.1</size>
             </box>
           </geometry>
+          <material> <!-- LED material -->
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+            <specular>0 0 0 0</specular>
+            <emissive>0 1 0 1</emissive>
+          </material> <!-- End LED material -->
         </visual>
         <sensor name="camera_1" type="camera">
           <camera>
@@ -152,7 +164,7 @@
             </image>
             <clip>
               <near>0.1</near>
-              <far>100</far>
+              <far>500</far>
             </clip>
             <distortion>
               <k1>0</k1>
@@ -181,7 +193,7 @@
 
     <model name="camera_2">
       <static>true</static>
-      <pose>-20 20 12 0 0 -0.7</pose>
+      <pose>-20 30 12 0 0 -0.7</pose>
       <link name="camera_0">
         <visual name="visual">
           <geometry>
@@ -189,6 +201,12 @@
               <size>0.3 0.1 0.1</size>
             </box>
           </geometry>
+          <material> <!-- LED material -->
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+            <specular>0 0 0 0</specular>
+            <emissive>0 1 0 1</emissive>
+          </material> <!-- End LED material -->
         </visual>
         <sensor name="camera_2" type="camera">
           <camera>
@@ -228,7 +246,7 @@
 
     <model name="camera_3">
       <static>true</static>
-      <pose>20 20 12 0 0 -2.2</pose>
+      <pose>20 30 12 0 0 -2.2</pose>
       <link name="camera_0">
         <visual name="visual">
           <geometry>
@@ -236,6 +254,12 @@
               <size>0.3 0.1 0.1</size>
             </box>
           </geometry>
+          <material> <!-- LED material -->
+            <ambient>0 0 0 1</ambient>
+            <diffuse>0 0 0 1</diffuse>
+            <specular>0 0 0 0</specular>
+            <emissive>0 1 0 1</emissive>
+          </material> <!-- End LED material -->
         </visual>
         <sensor name="camera_3" type="camera">
           <camera>
@@ -246,7 +270,7 @@
             </image>
             <clip>
               <near>0.1</near>
-              <far>100</far>
+              <far>500</far>
             </clip>
             <distortion>
               <k1>0</k1>
@@ -273,18 +297,18 @@
       </link>
     </model>
 
-    <model name="drone_0">
+    <model name="hb1">
       <include>
         <uri>model://x500</uri>
-        <name>drone_0</name>
+        <name>hb1</name>
       </include>
       <pose>0 0 1 0 0 0</pose>
     </model>
 
-    <model name="drone_1">
+    <model name="hb2">
       <include>
         <uri>model://x500</uri>
-        <name>drone_1</name>
+        <name>hb2</name>
       </include>
       <pose>1 0 1 0 0 0</pose>
     </model>

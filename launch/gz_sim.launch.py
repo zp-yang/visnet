@@ -24,7 +24,7 @@ def generate_launch_description():
     pkg_share = get_package_share_directory("visnet")
 
     # Set the path to the world file
-    world_file_name = "visnet_gz.world"
+    world_file_name = "visnet_gz_nocam.world"
     world_path = os.path.join(pkg_share, "worlds", world_file_name)
 
     # Set the path to the python scripts
@@ -67,7 +67,7 @@ def generate_launch_description():
 
     declare_pause_cmd = DeclareLaunchArgument(
         name="pause",
-        default_value="flase",
+        default_value="true",
         description="Start the gzserver paused or unpaused",
     )
 
@@ -79,7 +79,7 @@ def generate_launch_description():
             os.path.join(pkg_gazebo_ros, "launch", "gzserver.launch.py")
         ),
         condition=IfCondition(use_simulator),
-        launch_arguments={"world": world, "pause": 'true'}.items(),
+        launch_arguments={"world": world, "pause": 'false'}.items(),
     )
 
     # Start Gazebo client
@@ -111,10 +111,17 @@ def generate_launch_description():
         )
     ld.add_action(start_rviz)
 
-    move_entity = ExecuteProcess(
-        cmd=['python3', script_dir+'/set_entity_state.py'],
+    # move_entity = ExecuteProcess(
+    #     cmd=['python3', script_dir+'/set_entity_state.py'],
+    #     output='screen'
+    # )
+    # ld.add_action(move_entity)
+
+    # get entity state and publish PoseStamped message for ros2
+    get_entity = ExecuteProcess(
+        cmd=['python3', script_dir+'/get_entity_state.py'],
         output='screen'
     )
-    ld.add_action(move_entity)
+    ld.add_action(get_entity)
 
     return ld

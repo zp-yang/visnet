@@ -23,10 +23,10 @@ find_package(sensor_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 # find_package(ignition-gazebo6 REQUIRED)
 
-rosidl_generate_interfaces(${PROJECT_NAME}
-  "msg/CamMsmt.msg"
-  DEPENDENCIES std_msgs # Add packages that above messages depend on, in this case geometry_msgs for Sphere.msg
-)
+# rosidl_generate_interfaces(${PROJECT_NAME}
+#   "msg/CamMsmt.msg"
+#   DEPENDENCIES std_msgs # Add packages that above messages depend on, in this case geometry_msgs for Sphere.msg
+# )
 
 add_executable(talker src/publisher_member_function.cpp)
 ament_target_dependencies(talker rclcpp std_msgs)
@@ -41,6 +41,7 @@ install(DIRECTORY
   worlds
   models
   scripts
+  data
   DESTINATION share/${PROJECT_NAME}
 )
 # uncomment the following section in order to fill in

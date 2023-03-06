@@ -1,23 +1,10 @@
-<?xml version="1.0" ?>
-<!--
-  Gazebo Sim sdformat_urdf parser plugin demo
-
-  Try sending commands:
-
-    gz topic -t "/model/vehicle/cmd_vel" -m gz.msgs.Twist -p "linear: {x: 1.0}, angular: {z: -0.1}"
-    ros2 topic pub /model/vehicle/cmd_vel geometry_msgs/msg/Twist "{linear: {x: 5.0, y: 0.0, z: 0.0}, angular: {x: 0.0, y: 0.0, z: -0.1}}"
-
-  Listen to odometry:
-
-    gz topic -e -t /model/vehicle/odometry
-    ros2 topic echo /model/vehicle/odometry
-
--->
 <sdf version="1.8">
-  <world name="purdue-world">
-    <physics name="1ms" type="ignored">
+  <world name="purdue">
+    <gravity>0 0 -9.80</gravity>
+    <physics name="1ms" type="ode">
       <max_step_size>0.001</max_step_size>
       <real_time_factor>1.0</real_time_factor>
+      <real_time_update_rate>250</real_time_update_rate>
     </physics>
     <plugin
       filename="gz-sim-physics-system"
@@ -36,6 +23,22 @@
       filename="gz-sim-scene-broadcaster-system"
       name="gz::sim::systems::SceneBroadcaster">
     </plugin>
+    <plugin
+      filename="gz-sim-imu-system"
+      name="gz::sim::systems::Imu">
+    </plugin>
+    <plugin
+      filename="gz-sim-air-pressure-system"
+      name="gz::sim::systems::AirPressure">
+    </plugin>
+
+    <!-- <plugin name='ignition::gazebo::systems::Physics' filename='ignition-gazebo-physics-system'/>
+    <plugin name='ignition::gazebo::systems::UserCommands' filename='ignition-gazebo-user-commands-system'/>
+    <plugin name='ignition::gazebo::systems::SceneBroadcaster' filename='ignition-gazebo-scene-broadcaster-system'/>
+    <plugin name='ignition::gazebo::systems::Contact' filename='ignition-gazebo-contact-system'/>
+    <plugin name='ignition::gazebo::systems::Imu' filename='ignition-gazebo-imu-system'/>
+    <plugin name='ignition::gazebo::systems::AirPressure' filename='ignition-gazebo-air-pressure-system'/>
+    <plugin name='ignition::gazebo::systems::Sensors' filename='ignition-gazebo-sensors-system'> -->
 
     <scene>
       <ambient>1.0 1.0 1.0</ambient>
@@ -60,7 +63,7 @@
     <include>
       <uri>model://purdue</uri>
       <name>purdue</name>
-      <pose>0 0 -.0 0 0 0</pose>
+      <pose>0 0 0 0 0 0</pose>
     </include>
 
     <include>
@@ -70,7 +73,7 @@
     </include>
 
     <model name="camera_0">
-      <pose>0 15 1.0 0 0.0 0</pose>
+      <pose>0 15 1.0 0 0.0 -1.5</pose>
       <static>1</static>
       <link name="link">
         <pose>0.1 0.05 0.05 0 0 0</pose>
@@ -117,7 +120,7 @@
     </model>
 
     <model name="camera_1">
-      <pose>5 15 1.0 0 0.0 0</pose>
+      <pose>5 15 1.0 0 0.0 -2.1</pose>
       <static>1</static>
       <link name="link">
         <pose>0.1 0.05 0.05 0 0 0</pose>

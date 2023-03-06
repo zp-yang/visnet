@@ -20,19 +20,18 @@ find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
-find_package(rosidl_default_generators REQUIRED)
-# find_package(ignition-gazebo6 REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(ros_gz_interfaces REQUIRED)
+# find_package(gz-transport12 REQUIRED)
+# find_package(gz-msgs9 REQUIRED)
 
-# rosidl_generate_interfaces(${PROJECT_NAME}
-#   "msg/CamMsmt.msg"
-#   DEPENDENCIES std_msgs # Add packages that above messages depend on, in this case geometry_msgs for Sphere.msg
-# )
+find_package(rosidl_default_generators REQUIRED) # for custom msgs
 
-# add_executable(talker src/publisher_member_function.cpp)
-# ament_target_dependencies(talker rclcpp std_msgs)
+# add_executable(set_traj src/set_traj.cpp)
+# ament_target_dependencies(set_traj rclcpp std_msgs geometry_msgs)
 
 # install(TARGETS
-#   talker
+#   set_traj
 #   DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY

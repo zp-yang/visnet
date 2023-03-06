@@ -28,36 +28,45 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
 
-    pkg_ros_gz_sim_demos = get_package_share_directory('ros_gz_sim_demos')
     pkg_ros_gz_sim = get_package_share_directory('ros_gz_sim')
+    pkg_visnet = get_package_share_directory('visnet')
 
     gz_sim = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')),
-        launch_arguments={'gz_args': '-r camera_sensor.sdf'}.items(),
+        launch_arguments={
+            'gz_args': f'-r {pkg_visnet}/worlds/purdue.sdf'
+        }.items(),
     )
 
     # RViz
     rviz = Node(
         package='rviz2',
         executable='rviz2',
-        arguments=['-d', os.path.join(pkg_ros_gz_sim_demos, 'rviz', 'camera.rviz')],
+        arguments=['-d', os.path.join(pkg_visnet, 'config', 'visnet_sim.rviz')],
         condition=IfCondition(LaunchConfiguration('rviz'))
     )
 
-    # Bridge
+    # Image Bridge
     bridge = Node(
-        package='ros_gz_bridge',
-        executable='parameter_bridge',
-        arguments=['/camera@sensor_msgs/msg/Image@gz.msgs.Image',
-                   '/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo'],
+        package='ros_gz_image',
+        executable='image_bridge',
+        arguments=['camera_0','camera_1'],
         output='screen'
     )
 
+    # Service Bridge
+    service_bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        arguments=['/world/purdue/set_pose@ros_gz_interfaces/srv/SetEntityPose']
+    )
+
     return LaunchDescription([
+        gz_sim,
         DeclareLaunchArgument('rviz', default_value='true',
                               description='Open RViz.'),
-        gz_sim,
         bridge,
-        rviz
+        service_bridge,
+        rviz,
     ])

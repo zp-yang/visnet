@@ -31,14 +31,10 @@
       filename="gz-sim-air-pressure-system"
       name="gz::sim::systems::AirPressure">
     </plugin>
-
-    <!-- <plugin name='ignition::gazebo::systems::Physics' filename='ignition-gazebo-physics-system'/>
-    <plugin name='ignition::gazebo::systems::UserCommands' filename='ignition-gazebo-user-commands-system'/>
-    <plugin name='ignition::gazebo::systems::SceneBroadcaster' filename='ignition-gazebo-scene-broadcaster-system'/>
-    <plugin name='ignition::gazebo::systems::Contact' filename='ignition-gazebo-contact-system'/>
-    <plugin name='ignition::gazebo::systems::Imu' filename='ignition-gazebo-imu-system'/>
-    <plugin name='ignition::gazebo::systems::AirPressure' filename='ignition-gazebo-air-pressure-system'/>
-    <plugin name='ignition::gazebo::systems::Sensors' filename='ignition-gazebo-sensors-system'> -->
+    <plugin
+      filename="gz-sim-contact-system"
+      name="gz::sim::systems::Contact">
+    </plugin>
 
     <scene>
       <ambient>1.0 1.0 1.0</ambient>
@@ -64,12 +60,6 @@
       <uri>model://purdue</uri>
       <name>purdue</name>
       <pose>0 0 0 0 0 0</pose>
-    </include>
-
-    <include>
-      <uri>model://x500-Base</uri>
-      <name>drone</name>
-      <pose>0 10 1 0 0 0</pose>
     </include>
 
     <model name="camera_0">

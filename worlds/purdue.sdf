@@ -56,32 +56,31 @@
       <direction>-0.5 0.1 -0.9</direction>
     </light>
 
-    <include>
+    <!-- <include>
       <uri>model://purdue</uri>
       <name>purdue</name>
-      <pose>0 0 0 0 0 0</pose>
-    </include>
+      <pose>20 -20 0 0 0 0</pose>
+    </include> -->
+    
+    <model name="box">
+      <pose>0 10 1 0 0 0</pose>
+      <static>1</static>
+      <link name="link">
+          <visual name="visual">
+            <geometry>
+              <box>
+                <size>1 1 1</size>
+              </box>
+            </geometry>
+          </visual>
+      </link>
+    </model>
 
     <model name="camera_0">
       <pose>0 15 1.0 0 0.0 -1.5</pose>
       <static>1</static>
       <link name="link">
         <pose>0.1 0.05 0.05 0 0 0</pose>
-        <inertial>
-          <mass>0.1</mass>
-          <inertia>
-            <ixx>0.000166667</ixx>
-            <iyy>0.000166667</iyy>
-            <izz>0.000166667</izz>
-          </inertia>
-        </inertial>
-        <!-- <collision name="collision">
-          <geometry>
-            <box>
-              <size>0.1 0.1 0.1</size>
-            </box>
-          </geometry>
-        </collision> -->
         <visual name="visual">
           <geometry>
             <box>
@@ -93,18 +92,19 @@
           <camera>
             <horizontal_fov>1.047</horizontal_fov>
             <image>
-              <width>320</width>
-              <height>240</height>
+              <width>1920</width>
+              <height>1080</height>
             </image>
             <clip>
               <near>0.1</near>
-              <far>100</far>
+              <far>1000</far>
             </clip>
+            <camera_info_topic>camera_0/info</camera_info_topic>
           </camera>
           <always_on>1</always_on>
           <update_rate>30</update_rate>
           <visualize>true</visualize>
-          <topic>camera_0</topic>
+          <topic>camera_0/image</topic>
         </sensor>
       </link>
     </model>
@@ -122,13 +122,6 @@
             <izz>0.000166667</izz>
           </inertia>
         </inertial>
-        <!-- <collision name="collision">
-          <geometry>
-            <box>
-              <size>0.2 0.1 0.1</size>
-            </box>
-          </geometry>
-        </collision> -->
         <visual name="visual">
           <geometry>
             <box>
@@ -140,18 +133,101 @@
           <camera>
             <horizontal_fov>1.047</horizontal_fov>
             <image>
-              <width>320</width>
-              <height>240</height>
+              <width>1920</width>
+              <height>1080</height>
             </image>
             <clip>
               <near>0.1</near>
-              <far>100</far>
+              <far>2000</far>
             </clip>
+            <camera_info_topic>camera_1/info</camera_info_topic>
           </camera>
           <always_on>1</always_on>
           <update_rate>30</update_rate>
           <visualize>true</visualize>
-          <topic>camera_1</topic>
+          <topic>camera_1/image</topic>
+        </sensor>
+      </link>
+    </model>
+
+    <model name="camera_2">
+      <pose>5 -15 1.0 0 0.0 -1.5</pose>
+      <static>1</static>
+      <link name="link">
+        <pose>0.1 0.05 0.05 0 0 0</pose>
+        <inertial>
+          <mass>0.1</mass>
+          <inertia>
+            <ixx>0.000166667</ixx>
+            <iyy>0.000166667</iyy>
+            <izz>0.000166667</izz>
+          </inertia>
+        </inertial>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.2 0.1 0.1</size>
+            </box>
+          </geometry>
+        </visual>
+        <sensor name="camera_2" type="camera">
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image>
+              <width>1920</width>
+              <height>1080</height>
+            </image>
+            <clip>
+              <near>0.1</near>
+              <far>2000</far>
+            </clip>
+            <camera_info_topic>camera_2/info</camera_info_topic>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>30</update_rate>
+          <visualize>true</visualize>
+          <topic>camera_2/image</topic>
+        </sensor>
+      </link>
+    </model>
+
+    <model name="camera_3">
+      <pose>0 -15 1.0 0 0.0 1.5</pose>
+      <static>1</static>
+      <link name="link">
+        <pose>0.1 0.05 0.05 0 0 0</pose>
+        <inertial>
+          <mass>0.1</mass>
+          <inertia>
+            <ixx>0.000166667</ixx>
+            <iyy>0.000166667</iyy>
+            <izz>0.000166667</izz>
+          </inertia>
+        </inertial>
+        <visual name="visual">
+          <geometry>
+            <box>
+              <size>0.2 0.1 0.1</size>
+            </box>
+          </geometry>
+        </visual>
+        <sensor name="camera_3" type="camera">
+          <camera>
+            <horizontal_fov>1.047</horizontal_fov>
+            <image>
+              <width>1920</width>
+              <height>1080</height>
+            </image>
+            <clip>
+              <near>0.1</near>
+              <far>2000</far>
+            </clip>
+            <camera_info_topic>camera_3/info</camera_info_topic>
+          </camera>
+          <always_on>1</always_on>
+          <update_rate>30</update_rate>
+          <visualize>true</visualize>
+          <topic>camera_3/image</topic>
         </sensor>
       </link>
     </model>

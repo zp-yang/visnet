@@ -48,7 +48,7 @@ def generate_launch_description():
     )
 
     # Image Bridge
-    cameras = [f'camera_{i}' for i in range(4)]
+    cameras = [f'camera_{i}/image' for i in range(4)]
     bridge = Node(
         package='ros_gz_image',
         executable='image_bridge',
@@ -69,5 +69,5 @@ def generate_launch_description():
                               description='Open RViz.'),
         bridge,
         service_bridge,
-        rviz,
+        # rviz,
     ])

@@ -28,59 +28,24 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
 
-    pkg_ros_gz_sim = get_package_share_directory('ros_gz_sim')
-    pkg_visnet = get_package_share_directory('visnet')
-
-    gz_sim = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py')),
-        launch_arguments={
-            'gz_args': f'-r purdue.sdf'
-        }.items(),
-    )
-
-    # RViz
-    rviz = Node(
-        package='rviz2',
-        executable='rviz2',
-        arguments=['-d', os.path.join(pkg_visnet, 'config', 'visnet_sim.rviz')],
-        condition=IfCondition(LaunchConfiguration('rviz'))
-    )
-
     # Image Bridge
-    cameras = [f'camera_{i}/image' for i in range(4)]
+    camera_images = [f'camera_{i}/image' for i in range(4)]
+    
     bridge = Node(
         package='ros_gz_image',
         executable='image_bridge',
-        arguments=cameras,
+        arguments=camera_images,
         output='screen'
     )
 
-    # Service Bridge
-    service_bridge = Node(
+    # param Bridge
+    param_bridge = Node(
         package='ros_gz_bridge',
         executable='parameter_bridge',
         arguments=['/world/purdue/set_pose@ros_gz_interfaces/srv/SetEntityPose']
     )
 
-    # Spawn target
-
-    spawn = Node(package='ros_gz_sim', executable='create',
-                 arguments=[
-                    '-name', 'x500',
-                    '-x', '0',
-                    '-y', '0',
-                    '-z', '0.5',
-                    '-file', 'x500'
-                    ],
-                 output='screen')
-
     return LaunchDescription([
-        gz_sim,
-        DeclareLaunchArgument('rviz', default_value='true',
-                              description='Open RViz.'),
         bridge,
-        service_bridge,
-        spawn,
-        rviz,
+        param_bridge,
     ])

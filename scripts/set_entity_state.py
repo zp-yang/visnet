@@ -8,9 +8,9 @@ from rclpy.node import Node
 from rclpy.callback_groups import MutuallyExclusiveCallbackGroup, ReentrantCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
 
-from geometry_msgs.msg import Pose
-# import tf2_ros
+from tf2_ros import TransformBroadcaster
 
+from geometry_msgs.msg import Pose
 from ros_gz_interfaces.srv import SetEntityPose
 from ros_gz_interfaces.msg import Entity
 
@@ -161,13 +161,13 @@ def main(args=None):
     # executor = rclpy.get_global_executor()
     executor = MultiThreadedExecutor()
     
-    x0_1 = np.array([-40, 5, 20, 0, 0, 0], dtype=np.float64)
-    x0_2 = np.array([20, 4, 20, 0, 0, 0], dtype=np.float64)
+    x0_1 = np.array([-20, 5, 12, 0, 0, 0], dtype=np.float64)
+    x0_2 = np.array([20, 4, 12, 0, 0, 0], dtype=np.float64)
 
     # traj_data = get_traj_data(data_dir+"drone_traj.csv")
     # traj_1 = TargetTraj("hb1", target_traj_f_file, traj_data)
 
-    traj_1 = TargetTraj("drone", target_traj_straight, x0_1, x0_1+[80,0,0,0,0,0], 16)
+    traj_1 = TargetTraj("x500", target_traj_straight, x0_1, x0_1+[40,0,0,0,0,0], 10)
     # traj_2 = TargetTraj("hb2", target_traj_straight, x0_2, x0_2+[-40,0,0,0,0,0], 15)
 
     executor.add_node(traj_1)

@@ -1,6 +1,7 @@
 <sdf version="1.8">
   <world name="purdue">
-    <gravity>0 0 -9.80</gravity>
+    <!-- <gravity>0 0 -9.80</gravity> -->
+    <gravity>0 0 0</gravity>
     <physics name="1ms" type="ode">
       <max_step_size>0.001</max_step_size>
       <real_time_factor>1.0</real_time_factor>
@@ -56,28 +57,31 @@
       <direction>-0.5 0.1 -0.9</direction>
     </light>
 
-    <!-- <include>
+    <include>
       <uri>model://purdue</uri>
       <name>purdue</name>
-      <pose>20 -20 0 0 0 0</pose>
-    </include> -->
+      <pose>120 -338 0 0 0 0</pose>
+    </include>
     
     <model name="box">
-      <pose>0 10 1 0 0 0</pose>
+      <pose>0 0 8 0 0 0</pose>
       <static>1</static>
       <link name="link">
           <visual name="visual">
             <geometry>
               <box>
-                <size>1 1 1</size>
+                <size>.1 .1 .1</size>
               </box>
             </geometry>
+            <material>
+              <emissive>1 1 1 1</emissive>
+            </material>
           </visual>
       </link>
     </model>
 
     <model name="camera_0">
-      <pose>0 15 1.0 0 0.0 -1.5</pose>
+      <pose>10 10 10.0 0 0.0 -2.35</pose>
       <static>1</static>
       <link name="link">
         <pose>0.1 0.05 0.05 0 0 0</pose>
@@ -87,17 +91,22 @@
               <size>0.2 0.1 0.1</size>
             </box>
           </geometry>
+          <material>
+            <ambient>0.5, 0, 0, 0</ambient>
+            <diffuse>1.0, 0, 0, 0</diffuse>
+            <emissive>1 1 1 1</emissive>
+          </material>
         </visual>
         <sensor name="camera_0" type="camera">
           <camera>
-            <horizontal_fov>1.047</horizontal_fov>
+            <horizontal_fov>1.5</horizontal_fov>
             <image>
-              <width>1920</width>
-              <height>1080</height>
+              <width>640</width>
+              <height>480</height>
             </image>
             <clip>
               <near>0.1</near>
-              <far>1000</far>
+              <far>2000</far>
             </clip>
             <camera_info_topic>camera_0/info</camera_info_topic>
           </camera>
@@ -110,7 +119,7 @@
     </model>
 
     <model name="camera_1">
-      <pose>5 15 1.0 0 0.0 -2.1</pose>
+      <pose>-10 10 10.0 0 0.0 -0.78</pose>
       <static>1</static>
       <link name="link">
         <pose>0.1 0.05 0.05 0 0 0</pose>
@@ -128,13 +137,18 @@
               <size>0.2 0.1 0.1</size>
             </box>
           </geometry>
+          <material>
+            <ambient>0.5, 0, 0, 0</ambient>
+            <diffuse>1.0, 0, 0, 0</diffuse>
+            <emissive>1 1 1 1</emissive>
+          </material>
         </visual>
         <sensor name="camera_1" type="camera">
           <camera>
-            <horizontal_fov>1.047</horizontal_fov>
+            <horizontal_fov>1.5</horizontal_fov>
             <image>
-              <width>1920</width>
-              <height>1080</height>
+              <width>640</width>
+              <height>480</height>
             </image>
             <clip>
               <near>0.1</near>
@@ -151,7 +165,7 @@
     </model>
 
     <model name="camera_2">
-      <pose>5 -15 1.0 0 0.0 -1.5</pose>
+      <pose>-10 -10 10.0 0 0.0 0.78</pose>
       <static>1</static>
       <link name="link">
         <pose>0.1 0.05 0.05 0 0 0</pose>
@@ -169,13 +183,18 @@
               <size>0.2 0.1 0.1</size>
             </box>
           </geometry>
+          <material>
+            <ambient>0.5, 0, 0, 0</ambient>
+            <diffuse>1.0, 0, 0, 0</diffuse>
+            <emissive>1 1 1 1</emissive>
+          </material>
         </visual>
         <sensor name="camera_2" type="camera">
           <camera>
-            <horizontal_fov>1.047</horizontal_fov>
+            <horizontal_fov>1.5</horizontal_fov>
             <image>
-              <width>1920</width>
-              <height>1080</height>
+              <width>640</width>
+              <height>480</height>
             </image>
             <clip>
               <near>0.1</near>
@@ -192,7 +211,7 @@
     </model>
 
     <model name="camera_3">
-      <pose>0 -15 1.0 0 0.0 1.5</pose>
+      <pose>10 -10 10.0 0 0.0 2.35</pose>
       <static>1</static>
       <link name="link">
         <pose>0.1 0.05 0.05 0 0 0</pose>
@@ -210,13 +229,18 @@
               <size>0.2 0.1 0.1</size>
             </box>
           </geometry>
+          <material>
+            <ambient>0.5, 0, 0, 0</ambient>
+            <diffuse>1.0, 0, 0, 0</diffuse>
+            <emissive>1 1 1 1</emissive>
+          </material>
         </visual>
         <sensor name="camera_3" type="camera">
           <camera>
-            <horizontal_fov>1.047</horizontal_fov>
+            <horizontal_fov>1.5</horizontal_fov>
             <image>
-              <width>1920</width>
-              <height>1080</height>
+              <width>640</width>
+              <height>480</height>
             </image>
             <clip>
               <near>0.1</near>

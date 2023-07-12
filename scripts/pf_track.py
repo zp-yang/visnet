@@ -23,7 +23,7 @@ cam_names = [
     "camera2",
     "camera3",
     ]
-info_dir = '/home/zpyang/.ros/camera_info'
+info_dir = '../camera_info'
 with open(f'{info_dir}/camera_mocap_poses.json', 'r') as fs:
     camera_mocap_poses = json.load(fs)
 

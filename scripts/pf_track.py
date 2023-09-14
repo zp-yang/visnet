@@ -37,7 +37,10 @@ for name in cam_names:
     R_rel = np.array(calib_info['R'])
     c_rel = np.array(calib_info['c'])
     T_rel = SE3(R=R_rel, c=c_rel)
-    T_mocap = np.array(camera_mocap_poses[name])
+    mocap_pose = np.array(camera_mocap_poses[name])
+    R_mocap = mocap_pose[0:3, 0:3]
+    t_mocap = mocap_pose[0:3, -1].reshape(-1)
+    T_mocap = SE3(R=R_mocap, c=-R_mocap.T @ t_mocap)
     T_cam = T_rel @ T_mocap
     K = np.array(cam_info["camera_matrix"]["data"])
     cam_dist = np.array(cam_info["distortion_coefficients"]["data"])

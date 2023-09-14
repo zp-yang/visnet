@@ -11,26 +11,10 @@ def hom2cart(coord):
     coord = coord[0:-1]/coord[-1]
     return coord
 
-R_model2cam = np.array([
-    [0, 1, 0],
-    [0, 0, 1],
-    [1, 0, 0],        
-])
-
-# SE2, transform image coordiantes to match the book
-SE2_pix2image = np.array([
-    [-1, 0,  1600],
-    [0, -1, 1200],
-    [0, 0,  1],
-])
-
 class Camera:
     def __init__(self, K, pose):
         self.K = K
-        self.K_ = SE2_pix2image @ self.K @ R_model2cam
-        self.pose = pose
-        self.pos = pose[0:3, -1]
-        self.P = self.K_ @ pose[0:3,:]
+        self.T_cam = pose
 
         self.range = 25 # meters
         self.fov = np.deg2rad(90) #degrees, both directions
@@ -38,22 +22,21 @@ class Camera:
 
     def update_pose(self, pose):
         self.pose = pose
-        self.P = self.K_ @ pose[0:3,:]
     
-    def _get_pixel_pos_hom(self, target_pos):
-        return self.P @ cart2hom(target_pos)
-    
-    def _get_pixel_pos(self, target_pos):
-        pix_hom = self._get_pixel_pos_hom(target_pos)
-        pix_cart = pix_hom[0:-1, :] / pix_hom[-1,:]
-        return pix_cart
+    def _project_points(self, points):
+        # points shape should be (3, n)
+        points_h = np.vstack([points, np.ones((1,points.shape[1]))])
+        points_fcam = self.T_cam.M @ points_h
+        points_fcam = points_fcam[0:3, :] / points_fcam[2, :]
+        pix_pts = self.K @ points_fcam
+        return pix_pts[0:2, :]
     
     def _get_distance(self, target_pos):
         """
         !!!Should not be used directly in estimation!!!
         target_pos: (n, 3)
         """
-        dist =  np.linalg.norm(target_pos-self.pos, axis=1)
+        dist =  np.linalg.norm(target_pos-self.T_cam.c, axis=1)
         return dist
     
     def get_bearing(self, target_pos):
@@ -61,16 +44,15 @@ class Camera:
         Check if projectd pixel is within the picture bounds
         target_pos should be (3, n) shaped
         """        
-        bearing = self._get_pixel_pos(target_pos)
+        bearing = self._project_points(target_pos)
         
         mask = (bearing > 0) & (bearing < self.bound)
         mask = mask[0] & mask[1] # True if within bound, False if out of bound
         indices = np.where(mask==False)[0] # Find the indices of target that are out of bound
         
-        n = bearing.shape[1]
-        
+        # n = bearing.shape[1]
         # add noise to the pixel locations due to varying bounding box size
-        bearing = bearing + np.random.normal(0, 10, size=(2, n))
+        # bearing = bearing + np.random.normal(0, 5, size=(2, n))
         
         bearing[:, indices] = np.array([-1, -1]).reshape(2,1)
         return bearing, indices
